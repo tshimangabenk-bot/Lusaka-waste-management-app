@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Lusaka City Council — Smart Waste Management Admin Dashboard. Monitor bins, manage collection routes, view analytics, and track citizen reports across Lusaka's compounds.">
+    <title>Smart Waste Management — Admin Dashboard | Lusaka City Council</title>
+
+    <link rel="icon" href="favicon.ico">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons — Lucide (SVG via JS) -->
+    <script src="vendor/lucide.js"></script>
+
+    <!-- Leaflet.js — Map -->
+    <link rel="stylesheet" href="vendor/leaflet.css" />
+
+    <!-- Chart.js -->
+    <script src="vendor/chart.js"></script>
+
+    <!-- Leaflet.js -->
+    <script src="vendor/leaflet.js"></script>
+
+    <!-- App Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <!-- Background Glows -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="app-layout">
+
+        <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+                <i class="lucide-chevrons-left" id="toggleIcon"></i>
+            </div>
+
+            <div class="sidebar-header">
+                <div class="sidebar-logo">♻️</div>
+                <div class="sidebar-brand">
+                    <h1>SmartWaste</h1>
+                    <span>Lusaka City Council</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-label">Overview</div>
+                    <div class="nav-item active" data-page="dashboard" id="nav-dashboard">
+                        <i class="lucide-layout-dashboard"></i>
+                        <span>Dashboard</span>
+                    </div>
+                    <div class="nav-item" data-page="map" id="nav-map">
+                        <i class="lucide-map-pin"></i>
+                        <span>Live Map</span>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-label">Operations</div>
+                    <div class="nav-item" data-page="bins" id="nav-bins">
+                        <i class="lucide-trash-2"></i>
+                        <span>Smart Bins</span>
+                        <div class="nav-badge" id="badge-bins">24</div>
+                    </div>
+                    <div class="nav-item" data-page="routes" id="nav-routes">
+                        <i class="lucide-route"></i>
+                        <span>Collection Routes</span>
+                    </div>
+                    <div class="nav-item" data-page="vehicles" id="nav-vehicles">
+                        <i class="lucide-truck"></i>
+                        <span>Fleet</span>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-label">Community</div>
+                    <div class="nav-item" data-page="reports" id="nav-reports">
+                        <i class="lucide-message-square-warning"></i>
+                        <span>Citizen Reports</span>
+                        <div class="nav-badge" id="badge-reports">7</div>
+                    </div>
+                    <div class="nav-item" data-page="rewards" id="nav-rewards">
+                        <i class="lucide-gift"></i>
+                        <span>Incentives</span>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-label">Intelligence</div>
+                    <div class="nav-item" data-page="analytics" id="nav-analytics">
+                        <i class="lucide-bar-chart-3"></i>
+                        <span>Analytics</span>
+                    </div>
+                    <div class="nav-item" data-page="alerts" id="nav-alerts">
+                        <i class="lucide-bell-ring"></i>
+                        <span>Alerts</span>
+                        <div class="nav-badge" id="badge-alerts">12</div>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-label">System</div>
+                    <div class="nav-item" data-page="zones" id="nav-zones">
+                        <i class="lucide-layers"></i>
+                        <span>Zones</span>
+                    </div>
+                    <div class="nav-item" data-page="users" id="nav-users">
+                        <i class="lucide-users"></i>
+                        <span>Users</span>
+                    </div>
+                    <div class="nav-item" data-page="settings" id="nav-settings">
+                        <i class="lucide-settings"></i>
+                        <span>Settings</span>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="user-avatar">LM</div>
+                    <div class="user-info">
+                        <div class="name">Luwi Mwanza</div>
+                        <div class="role">System Administrator</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
+        <main class="main-content" id="mainContent">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <div class="page-title-section">
+                        <h2 id="pageTitle">Dashboard</h2>
+                        <p id="pageSubtitle">Real-time overview of Lusaka's waste management</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-search">
+                        <i class="lucide-search"></i>
+                        <input type="text" placeholder="Search bins, zones, reports…" id="globalSearch">
+                    </div>
+                    <button class="header-btn" id="headerNotifBtn" title="Notifications">
+                        <i class="lucide-bell"></i>
+                        <span class="badge" id="headerNotifBadge">12</span>
+                    </button>
+                    <button class="header-btn" id="headerRefreshBtn" title="Refresh data">
+                        <i class="lucide-refresh-cw"></i>
+                    </button>
+                    <div class="header-time">
+                        <span class="time" id="headerTime">--:--</span>
+                        <span id="headerDate">Loading…</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-container">
+
+                <!-- ════════════ PAGE: DASHBOARD ════════════ -->
+                <section class="page-section active" id="page-dashboard">
+                    <!-- Stats Row -->
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Filled by JS -->
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="dashboard-grid triple">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-bar-chart-3"></i> Waste Collection Trends</h3>
+                                <div class="tab-bar">
+                                    <button class="tab-btn active" data-range="7d">7 Days</button>
+                                    <button class="tab-btn" data-range="30d">30 Days</button>
+                                    <button class="tab-btn" data-range="90d">90 Days</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="collectionTrendsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-pie-chart"></i> Fill Distribution</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="fillDistributionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Alerts + Zone Summary Row -->
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-bell-ring"></i> Recent Alerts</h3>
+                                <button class="btn btn-secondary btn-sm" onclick="navigateTo('alerts')">View
+                                    All</button>
+                            </div>
+                            <div class="card-body no-padding" id="dashboardAlerts">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-layers"></i> Zone Performance</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="zonePerformanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: LIVE MAP ════════════ -->
+                <section class="page-section" id="page-map">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-map-pin"></i> Live Bin Map — Lusaka</h3>
+                            <div style="display:flex;gap:8px;">
+                                <select class="form-control" id="mapFilterZone"
+                                    style="width:180px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All Zones</option>
+                                </select>
+                                <select class="form-control" id="mapFilterStatus"
+                                    style="width:150px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All Statuses</option>
+                                    <option value="full">Full</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                    <option value="empty">Empty</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body no-padding">
+                            <div class="map-container" id="mapContainer"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: SMART BINS ════════════ -->
+                <section class="page-section" id="page-bins">
+                    <div class="stats-grid" id="binsStatsGrid"></div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-trash-2"></i> All Smart Bins</h3>
+                            <div style="display:flex;gap:8px;">
+                                <select class="form-control" id="binsFilterZone"
+                                    style="width:180px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All Zones</option>
+                                </select>
+                                <select class="form-control" id="binsFilterStatus"
+                                    style="width:140px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All</option>
+                                    <option value="full">Full</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                    <option value="empty">Empty</option>
+                                </select>
+                                <button class="btn btn-primary" id="addBinBtn"><i class="lucide-plus"></i> Add
+                                    Bin</button>
+                            </div>
+                        </div>
+                        <div class="card-body no-padding">
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="binsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Label</th>
+                                            <th>Zone</th>
+                                            <th>Type</th>
+                                            <th>Fill Level</th>
+                                            <th>Status</th>
+                                            <th>Last Emptied</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="binsTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: COLLECTION ROUTES ════════════ -->
+                <section class="page-section" id="page-routes">
+                    <div class="stats-grid" id="routesStatsGrid"></div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-route"></i> Collection Routes</h3>
+                            <div style="display:flex;gap:8px;">
+                                <input type="date" class="form-control" id="routeFilterDate"
+                                    style="width:160px;padding:6px 10px;font-size:0.78rem;">
+                                <button class="btn btn-primary" id="addRouteBtn"><i class="lucide-plus"></i> Plan
+                                    Route</button>
+                            </div>
+                        </div>
+                        <div class="card-body no-padding">
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="routesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Route Name</th>
+                                            <th>Zone</th>
+                                            <th>Vehicle</th>
+                                            <th>Driver</th>
+                                            <th>Scheduled</th>
+                                            <th>Stops</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="routesTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: FLEET ════════════ -->
+                <section class="page-section" id="page-vehicles">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-truck"></i> Fleet Vehicles</h3>
+                            <button class="btn btn-primary" id="addVehicleBtn"><i class="lucide-plus"></i> Add
+                                Vehicle</button>
+                        </div>
+                        <div class="card-body no-padding">
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="vehiclesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Registration</th>
+                                            <th>Type</th>
+                                            <th>Capacity (tons)</th>
+                                            <th>Status</th>
+                                            <th>Assigned Driver</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vehiclesTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: CITIZEN REPORTS ════════════ -->
+                <section class="page-section" id="page-reports">
+                    <div class="stats-grid" id="reportsStatsGrid"></div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-message-square-warning"></i> Citizen Reports</h3>
+                            <div style="display:flex;gap:8px;">
+                                <select class="form-control" id="reportsFilterStatus"
+                                    style="width:150px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="acknowledged">Acknowledged</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                                <select class="form-control" id="reportsFilterCategory"
+                                    style="width:170px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All Categories</option>
+                                    <option value="illegal_dumping">Illegal Dumping</option>
+                                    <option value="overflowing_bin">Overflowing Bin</option>
+                                    <option value="missed_collection">Missed Collection</option>
+                                    <option value="hazardous_waste">Hazardous Waste</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body no-padding">
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="reportsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Reporter</th>
+                                            <th>Category</th>
+                                            <th>Zone</th>
+                                            <th>Description</th>
+                                            <th>Status</th>
+                                            <th>Submitted</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportsTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: REWARDS / INCENTIVES ════════════ -->
+                <section class="page-section" id="page-rewards">
+                    <div class="stats-grid" id="rewardsStatsGrid"></div>
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-gift"></i> Reward Catalog</h3>
+                                <button class="btn btn-primary btn-sm" id="addRewardBtn"><i class="lucide-plus"></i> Add
+                                    Item</button>
+                            </div>
+                            <div class="card-body no-padding">
+                                <table class="data-table" id="rewardCatalogTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Points Cost</th>
+                                            <th>Stock</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rewardCatalogBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-trophy"></i> Top Earners</h3>
+                            </div>
+                            <div class="card-body no-padding">
+                                <table class="data-table" id="topEarnersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Resident</th>
+                                            <th>Points</th>
+                                            <th>Compound</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topEarnersBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: ANALYTICS ════════════ -->
+                <section class="page-section" id="page-analytics">
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-trending-up"></i> Waste Generation Forecast</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="height:320px;">
+                                    <canvas id="forecastChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-bar-chart-3"></i> Zone Comparison</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="height:320px;">
+                                    <canvas id="zoneComparisonChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-brain"></i> ML Model Performance</h3>
+                        </div>
+                        <div class="card-body no-padding">
+                            <table class="data-table" id="mlModelsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Model Name</th>
+                                        <th>Version</th>
+                                        <th>Accuracy</th>
+                                        <th>Trained</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mlModelsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: ALERTS ════════════ -->
+                <section class="page-section" id="page-alerts">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-bell-ring"></i> System Alerts</h3>
+                            <div style="display:flex;gap:8px;">
+                                <select class="form-control" id="alertsFilterSeverity"
+                                    style="width:140px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All</option>
+                                    <option value="critical">Critical</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="info">Info</option>
+                                </select>
+                                <button class="btn btn-secondary btn-sm" id="markAllReadBtn"><i
+                                        class="lucide-check-check"></i> Mark All Read</button>
+                            </div>
+                        </div>
+                        <div class="card-body no-padding" id="alertsListContainer">
+                            <!-- Filled by JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: ZONES ════════════ -->
+                <section class="page-section" id="page-zones">
+                    <div class="zone-grid" id="zonesGrid">
+                        <!-- Filled by JS -->
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: USERS ════════════ -->
+                <section class="page-section" id="page-users">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="lucide-users"></i> Registered Users</h3>
+                            <div style="display:flex;gap:8px;">
+                                <select class="form-control" id="usersFilterRole"
+                                    style="width:140px;padding:6px 10px;font-size:0.78rem;">
+                                    <option value="">All Roles</option>
+                                    <option value="resident">Resident</option>
+                                    <option value="collector">Collector</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body no-padding">
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="usersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Role</th>
+                                            <th>Compound</th>
+                                            <th>Joined</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ════════════ PAGE: SETTINGS ════════════ -->
+                <section class="page-section" id="page-settings">
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-sliders-horizontal"></i> System Configuration</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Fill Alert Threshold (%)</label>
+                                    <input type="number" class="form-control" value="85" id="settingsAlertThreshold">
+                                </div>
+                                <div class="form-group">
+                                    <label>Overflow Alert Threshold (%)</label>
+                                    <input type="number" class="form-control" value="95" id="settingsOverflowThreshold">
+                                </div>
+                                <div class="form-group">
+                                    <label>Points per Verified Report</label>
+                                    <input type="number" class="form-control" value="10" id="settingsPointsPerReport">
+                                </div>
+                                <div class="form-group">
+                                    <label>Data Refresh Interval (seconds)</label>
+                                    <input type="number" class="form-control" value="30" id="settingsRefreshInterval">
+                                </div>
+                                <button class="btn btn-primary" id="saveSettingsBtn"><i class="lucide-save"></i> Save
+                                    Changes</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-server"></i> System Health</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="zone-stat-row">
+                                    <span class="label">API Server</span>
+                                    <span class="status-badge online">Online</span>
+                                </div>
+                                <div class="zone-stat-row">
+                                    <span class="label">PostgreSQL Database</span>
+                                    <span class="status-badge online">Connected</span>
+                                </div>
+                                <div class="zone-stat-row">
+                                    <span class="label">MQTT Broker</span>
+                                    <span class="status-badge online">Listening</span>
+                                </div>
+                                <div class="zone-stat-row">
+                                    <span class="label">ML Prediction Engine</span>
+                                    <span class="status-badge online">Active</span>
+                                </div>
+                                <div class="zone-stat-row">
+                                    <span class="label">Google Maps API</span>
+                                    <span class="status-badge online">Operational</span>
+                                </div>
+                                <div class="zone-stat-row">
+                                    <span class="label">Last Data Sync</span>
+                                    <span class="val" id="lastSyncTime">Just now</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div><!-- .page-container -->
+        </main>
+
+    </div><!-- .app-layout -->
+
+    <!-- ═══════════════════════ MODAL ═══════════════════════ -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Title</h3>
+                <button class="modal-close" id="modalClose"><i class="lucide-x"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+                <button class="btn btn-primary" id="modalConfirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Lucide Icon Initializer — converts class="lucide-*" to data-lucide -->
+    <script>
+    (function() {
+        // Convert all <i class="lucide-icon-name"> to <i data-lucide="icon-name">
+        document.querySelectorAll('[class*="lucide-"]').forEach(el => {
+            const cls = [...el.classList].find(c => c.startsWith('lucide-'));
+            if (cls) {
+                el.setAttribute('data-lucide', cls.replace('lucide-', ''));
+            }
+        });
+        lucide.createIcons();
+    })();
+    </script>
+
+    <!-- App Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
