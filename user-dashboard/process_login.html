@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading — SmartWaste Lusaka</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <script src="../admin-dashboard/vendor/lucide.js"></script>
+    <link rel="stylesheet" href="css/auth.css">
+
+    <style>
+        /* ── Process login specific ───────────────────────────── */
+        body { overflow: hidden; }
+
+        .process-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+        }
+
+        .process-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            padding: 52px 48px;
+            max-width: 440px;
+            width: 100%;
+            text-align: center;
+            animation: cardIn 0.5s var(--ease);
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Animated logo mark */
+        .process-logo {
+            width: 80px; height: 80px;
+            background: var(--bg-dark);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .process-logo::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%);
+            animation: shimmer-logo 2s ease-in-out infinite;
+            transform: translateX(-100%);
+        }
+        @keyframes shimmer-logo { to { transform: translateX(100%); } }
+
+        .process-logo svg { color: #8ecb86; }
+
+        .process-brand {
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Steps list */
+        .steps-list {
+            list-style: none;
+            margin: 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 11px 16px;
+            border-radius: var(--radius-sm);
+            text-align: left;
+            transition: background var(--t-fast);
+        }
+        .step-row.active { background: var(--accent-light); }
+        .step-row.done   { opacity: 0.65; }
+
+        .step-row-icon {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            transition: all var(--t-base);
+        }
+        .step-row-icon.pending  { background: var(--bg-muted); color: var(--text-muted); border: 2px solid var(--border); }
+        .step-row-icon.spinning { background: var(--accent-light); color: var(--accent); border: 2px solid var(--accent); animation: spin 1s linear infinite; }
+        .step-row-icon.done     { background: var(--accent); color: #fff; border: 2px solid var(--accent); }
+        .step-row-icon.error    { background: #fef2f2; color: var(--danger); border: 2px solid var(--danger); }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .step-row-label {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            flex: 1;
+        }
+        .step-row-label.muted { color: var(--text-muted); }
+
+        .step-row-time {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Progress bar */
+        .progress-track {
+            height: 4px;
+            background: var(--border);
+            border-radius: 100px;
+            overflow: hidden;
+            margin: 4px 0 28px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-mid));
+            border-radius: 100px;
+            width: 0%;
+            transition: width 0.6s var(--ease);
+        }
+
+        /* Status message */
+        .status-msg {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            min-height: 22px;
+            transition: opacity var(--t-base);
+        }
+
+        /* Success state */
+        .success-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .success-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: var(--accent-light);
+            border: 2px solid var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: var(--accent);
+            animation: popIn 0.4s var(--ease);
+            margin: 0 auto 8px;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+        .success-title {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            color: var(--text-dark);
+            font-style: italic;
+            font-weight: 400;
+        }
+        .success-sub { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Welcome banner (new users) */
+        .welcome-banner {
+            display: none;
+            background: var(--accent-light);
+            border: 1px solid rgba(61,122,58,0.2);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            gap: 10px;
+            align-items: center;
+            text-align: left;
+            margin-top: 16px;
+            font-size: 0.82rem;
+            color: var(--accent-text);
+        }
+        .welcome-banner i { flex-shrink: 0; font-size: 1rem; }
+
+        /* Error state */
+        .error-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .error-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: #fef2f2;
+            border: 2px solid var(--danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: var(--danger);
+            margin: 0 auto 8px;
+        }
+        .error-title { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); }
+        .error-sub   { font-size: 0.83rem; color: var(--text-muted); }
+        .retry-btn {
+            margin-top: 8px;
+            padding: 9px 24px;
+            background: var(--bg-dark);
+            color: #fff;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: opacity var(--t-fast);
+        }
+        .retry-btn:hover { opacity: 0.85; }
+
+        @media (max-width: 500px) {
+            .process-card { padding: 36px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-bg" aria-hidden="true">
+        <div class="auth-orb orb-a"></div>
+        <div class="auth-orb orb-b"></div>
+        <div class="auth-pattern"></div>
+    </div>
+
+    <div class="process-shell">
+        <div class="process-card" id="process-card">
+
+            <!-- Logo -->
+            <div class="process-logo">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+            </div>
+            <div class="process-brand">SmartWaste · Lusaka</div>
+
+            <!-- Main steps UI -->
+            <div id="main-view">
+                <div class="progress-track" style="margin-top:20px">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+
+                <ul class="steps-list" id="steps-list">
+                    <li class="step-row" id="row-token">
+                        <div class="step-row-icon pending" id="icon-token"><i class="lucide-key-round"></i></div>
+                        <span class="step-row-label muted" id="label-token">Verifying credentials</span>
+                    </li>
+                    <li class="step-row" id="row-profile">
+                        <div class="step-row-icon pending" id="icon-profile"><i class="lucide-user-circle"></i></div>
+                        <span class="step-row-label muted" id="label-profile">Loading your profile</span>
+                    </li>
+                    <li class="step-row" id="row-data">
+                        <div class="step-row-icon pending" id="icon-data"><i class="lucide-database"></i></div>
+                        <span class="step-row-label muted" id="label-data">Fetching your data</span>
+                    </li>
+                    <li class="step-row" id="row-ready">
+                        <div class="step-row-icon pending" id="icon-ready"><i class="lucide-rocket"></i></div>
+                        <span class="step-row-label muted" id="label-ready">Preparing your dashboard</span>
+                    </li>
+                </ul>
+
+                <div class="status-msg" id="status-msg">Signing you in…</div>
+            </div>
+
+            <!-- Success view -->
+            <div class="success-state" id="success-view">
+                <div class="success-icon"><i class="lucide-check"></i></div>
+                <div class="success-title" id="success-title">Welcome back!</div>
+                <div class="success-sub">Taking you to your dashboard…</div>
+                <div class="welcome-banner" id="welcome-banner">
+                    <i class="lucide-leaf"></i>
+                    <span>Your account is set up and you're ready to earn your first green points. Submit a report to get started!</span>
+                </div>
+            </div>
+
+            <!-- Error view -->
+            <div class="error-state" id="error-view">
+                <div class="error-icon"><i class="lucide-alert-triangle"></i></div>
+                <div class="error-title">Sign-in failed</div>
+                <div class="error-sub" id="error-msg">Something went wrong. Please try again.</div>
+                <button class="retry-btn" onclick="window.location.href='login.html'">Back to login</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        lucide.createIcons();
+
+        const token    = localStorage.getItem('sw_access_token');
+        const isNew    = localStorage.getItem('sw_new_user') === '1';
+
+        /* ── Step helpers ──────────────────────────────────────── */
+        const steps = ['token','profile','data','ready'];
+        const TOTAL = steps.length;
+        let done = 0;
+
+        function setStep(id, state, labelText) {
+            const icon  = document.getElementById(`icon-${id}`);
+            const label = document.getElementById(`label-${id}`);
+            const row   = document.getElementById(`row-${id}`);
+
+            icon.className = `step-row-icon ${state}`;
+
+            if (state === 'spinning') {
+                icon.innerHTML = '<i class="lucide-loader-2"></i>';
+                row.classList.add('active');
+                label.classList.remove('muted');
+            } else if (state === 'done') {
+                icon.innerHTML = '<i class="lucide-check"></i>';
+                row.classList.remove('active');
+                row.classList.add('done');
+                done++;
+                document.getElementById('progress-fill').style.width = `${(done / TOTAL) * 100}%`;
+            } else if (state === 'error') {
+                icon.innerHTML = '<i class="lucide-x"></i>';
+                row.classList.remove('active');
+            }
+
+            if (labelText) label.textContent = labelText;
+            lucide.createIcons();
+        }
+
+        function setStatus(msg) {
+            document.getElementById('status-msg').textContent = msg;
+        }
+
+        function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        /* ── Main process ──────────────────────────────────────── */
+        async function processLogin() {
+            // Guard: no token
+            if (!token) {
+                showError('No session found. Please sign in again.');
+                return;
+            }
+
+            try {
+                // Step 1 — verify token
+                setStep('token', 'spinning', 'Verifying credentials…');
+                setStatus('Checking your session…');
+                await delay(420);
+
+                let userData;
+                try {
+                    const res = await fetch(`${API}/auth/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!res.ok) throw new Error('Invalid session');
+                    userData = await res.json();
+                } catch {
+                    throw new Error('Session verification failed. Please sign in again.');
+                }
+                setStep('token', 'done', 'Credentials verified');
+
+                // Redirect non-residents
+                if (userData.role === 'admin' || userData.role === 'supervisor') {
+                    setStatus('Redirecting to admin panel…');
+                    await delay(600);
+                    window.location.href = '../admin-dashboard/index.html';
+                    return;
+                }
+
+                // Step 2 — load profile
+                setStep('profile', 'spinning', 'Loading your profile…');
+                setStatus(`Hi, ${userData.first_name}!`);
+                await delay(500);
+                setStep('profile', 'done', `Profile loaded · ${userData.compound || 'Lusaka'}`);
+
+                // Step 3 — fetch dashboard data
+                setStep('data', 'spinning', 'Fetching your data…');
+                setStatus('Pulling in your reports and rewards…');
+
+                let dashData;
+                try {
+                    const res = await fetch(`${API}/users/me/dashboard`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        dashData = await res.json();
+                        sessionStorage.setItem('sw_dash_cache', JSON.stringify(dashData));
+                    }
+                } catch { /* non-fatal — dashboard will fetch itself */ }
+
+                setStep('data', 'done',
+                    dashData
+                        ? `${dashData.report_stats?.total ?? 0} reports · ${dashData.rewards?.total_points ?? 0} pts`
+                        : 'Data ready');
+
+                // Step 4 — prepare
+                setStep('ready', 'spinning', 'Preparing your dashboard…');
+                setStatus('Almost there…');
+                await delay(380);
+                setStep('ready', 'done', 'Dashboard ready!');
+
+                // Show success
+                await delay(200);
+                showSuccess(userData, isNew);
+
+            } catch (err) {
+                showError(err.message || 'An unexpected error occurred.');
+            }
+        }
+
+        function showSuccess(user, newUser) {
+            document.getElementById('main-view').style.display = 'none';
+            const sv = document.getElementById('success-view');
+            sv.style.display = 'flex';
+
+            document.getElementById('success-title').textContent =
+                newUser ? `Welcome, ${user.first_name}!` : `Welcome back, ${user.first_name}!`;
+
+            if (newUser) {
+                document.getElementById('welcome-banner').style.display = 'flex';
+                localStorage.removeItem('sw_new_user');
+            }
+
+            lucide.createIcons();
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, newUser ? 2800 : 1600);
+        }
+
+        function showError(msg) {
+            document.getElementById('main-view').style.display = 'none';
+            const ev = document.getElementById('error-view');
+            ev.style.display = 'flex';
+            document.getElementById('error-msg').textContent = msg;
+            lucide.createIcons();
+        }
+
+        // Kick off
+        processLogin();
+    </script>
+</body>
+</html>

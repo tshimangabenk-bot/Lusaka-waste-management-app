@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create account — SmartWaste Lusaka</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <script src="../admin-dashboard/vendor/lucide.js"></script>
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+    <div class="auth-bg" aria-hidden="true">
+        <div class="auth-orb orb-a"></div>
+        <div class="auth-orb orb-b"></div>
+        <div class="auth-pattern"></div>
+    </div>
+
+    <div class="auth-shell">
+
+        <!-- Left panel — branding -->
+        <div class="auth-panel auth-panel--left">
+            <div class="panel-content">
+                <div class="panel-brand">
+                    <div class="brand-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </div>
+                    <span>SmartWaste</span>
+                </div>
+
+                <div class="panel-hero">
+                    <h1 class="panel-headline">Join the<br><em>green movement.</em></h1>
+                    <p class="panel-sub">Register as a Lusaka resident and start earning rewards for helping keep your compound clean.</p>
+                </div>
+
+                <!-- How it works steps -->
+                <div class="how-it-works">
+                    <div class="hiw-step">
+                        <div class="hiw-icon"><i class="lucide-user-plus"></i></div>
+                        <div class="hiw-body">
+                            <span class="hiw-title">Create your account</span>
+                            <span class="hiw-desc">Free for all Lusaka residents</span>
+                        </div>
+                    </div>
+                    <div class="hiw-step">
+                        <div class="hiw-icon"><i class="lucide-flag"></i></div>
+                        <div class="hiw-body">
+                            <span class="hiw-title">Submit waste reports</span>
+                            <span class="hiw-desc">Earn 10 green points per verified report</span>
+                        </div>
+                    </div>
+                    <div class="hiw-step">
+                        <div class="hiw-icon"><i class="lucide-gift"></i></div>
+                        <div class="hiw-body">
+                            <span class="hiw-title">Redeem rewards</span>
+                            <span class="hiw-desc">Bus passes, recycling bins &amp; more</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-badge">
+                    <i class="lucide-shield-check"></i>
+                    <span>Your data is kept private and secure</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right panel — form -->
+        <div class="auth-panel auth-panel--right auth-panel--scroll">
+            <div class="form-shell">
+
+                <div class="form-header">
+                    <h2 class="form-title">Create account</h2>
+                    <p class="form-sub">It only takes a minute</p>
+                </div>
+
+                <!-- Step indicator -->
+                <div class="steps-bar">
+                    <div class="step active" id="step-ind-1">
+                        <div class="step-dot">1</div>
+                        <span>Personal</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step-ind-2">
+                        <div class="step-dot">2</div>
+                        <span>Location</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step" id="step-ind-3">
+                        <div class="step-dot">3</div>
+                        <span>Security</span>
+                    </div>
+                </div>
+
+                <form class="auth-form" id="register-form" novalidate>
+
+                    <!-- ─ Step 1: Personal ─ -->
+                    <div class="form-step active" id="step-1">
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="first-name">First name</label>
+                                <div class="input-wrap">
+                                    <i class="lucide-user input-icon"></i>
+                                    <input class="form-input" id="first-name" type="text" autocomplete="given-name" placeholder="e.g. Chanda" required>
+                                </div>
+                                <span class="field-error" id="first-name-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="last-name">Last name</label>
+                                <div class="input-wrap">
+                                    <i class="lucide-user input-icon"></i>
+                                    <input class="form-input" id="last-name" type="text" autocomplete="family-name" placeholder="e.g. Mwale" required>
+                                </div>
+                                <span class="field-error" id="last-name-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="reg-email">Email address</label>
+                            <div class="input-wrap">
+                                <i class="lucide-mail input-icon"></i>
+                                <input class="form-input" id="reg-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+                            </div>
+                            <span class="field-error" id="reg-email-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="phone">
+                                Phone number
+                                <span class="label-optional">optional</span>
+                            </label>
+                            <div class="input-wrap">
+                                <i class="lucide-phone input-icon"></i>
+                                <input class="form-input" id="phone" type="tel" autocomplete="tel" placeholder="+260 97X XXX XXX">
+                            </div>
+                        </div>
+
+                        <button class="submit-btn" type="button" id="next-1">
+                            <span>Continue</span>
+                            <i class="lucide-arrow-right"></i>
+                        </button>
+
+                    </div>
+
+                    <!-- ─ Step 2: Location ─ -->
+                    <div class="form-step" id="step-2">
+
+                        <div class="form-group">
+                            <label class="form-label" for="compound">Compound / neighbourhood</label>
+                            <div class="input-wrap">
+                                <i class="lucide-map-pin input-icon"></i>
+                                <select class="form-input form-select" id="compound">
+                                    <option value="">Select your compound…</option>
+                                    <optgroup label="Popular compounds">
+                                        <option>Kabulonga</option>
+                                        <option>Woodlands</option>
+                                        <option>Ibex Hill</option>
+                                        <option>Northmead</option>
+                                        <option>Chelstone</option>
+                                        <option>Chilenje</option>
+                                        <option>Matero</option>
+                                        <option>Kalingalinga</option>
+                                        <option>Mandevu</option>
+                                        <option>George</option>
+                                        <option>Chawama</option>
+                                        <option>Mtendere</option>
+                                        <option>Chaisa</option>
+                                        <option>Bauleni</option>
+                                        <option>Ng'ombe</option>
+                                        <option>Kamwala</option>
+                                        <option>Roma</option>
+                                        <option>Avondale</option>
+                                        <option>Longacres</option>
+                                        <option>Rhodes Park</option>
+                                    </optgroup>
+                                    <option value="__other">Other (type below)</option>
+                                </select>
+                            </div>
+                            <span class="field-error" id="compound-error"></span>
+                        </div>
+
+                        <!-- Other compound text input (hidden by default) -->
+                        <div class="form-group" id="compound-other-wrap" style="display:none">
+                            <label class="form-label" for="compound-other">Compound name</label>
+                            <div class="input-wrap">
+                                <i class="lucide-pencil input-icon"></i>
+                                <input class="form-input" id="compound-other" type="text" placeholder="Enter your compound name">
+                            </div>
+                        </div>
+
+                        <div class="location-box" id="location-box">
+                            <div class="location-box-header">
+                                <div class="location-box-title">
+                                    <i class="lucide-crosshair"></i>
+                                    GPS location
+                                    <span class="label-optional">optional</span>
+                                </div>
+                                <button class="locate-btn" type="button" id="get-location-btn">Detect</button>
+                            </div>
+                            <div class="location-box-status" id="location-status">
+                                Helps us find smart bins near your home.
+                            </div>
+                            <div class="form-row" style="margin-top:10px">
+                                <div class="form-group" style="margin:0">
+                                    <input class="form-input" id="reg-lat" type="number" step="any" placeholder="Latitude">
+                                </div>
+                                <div class="form-group" style="margin:0">
+                                    <input class="form-input" id="reg-lng" type="number" step="any" placeholder="Longitude">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-nav">
+                            <button class="back-btn" type="button" id="back-1">
+                                <i class="lucide-arrow-left"></i>
+                                Back
+                            </button>
+                            <button class="submit-btn step-next" type="button" id="next-2">
+                                <span>Continue</span>
+                                <i class="lucide-arrow-right"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- ─ Step 3: Security ─ -->
+                    <div class="form-step" id="step-3">
+
+                        <div class="form-group">
+                            <label class="form-label" for="reg-password">Password</label>
+                            <div class="input-wrap">
+                                <i class="lucide-lock input-icon"></i>
+                                <input class="form-input" id="reg-password" type="password" autocomplete="new-password" placeholder="At least 8 characters" required>
+                                <button class="toggle-pw" type="button" id="toggle-pw1" aria-label="Show password">
+                                    <i class="lucide-eye" id="pw1-eye"></i>
+                                </button>
+                            </div>
+                            <span class="field-error" id="reg-password-error"></span>
+                            <!-- Strength bar -->
+                            <div class="strength-bar" id="strength-bar" style="display:none">
+                                <div class="strength-track">
+                                    <div class="strength-fill" id="strength-fill"></div>
+                                </div>
+                                <span class="strength-label" id="strength-label"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirm-password">Confirm password</label>
+                            <div class="input-wrap">
+                                <i class="lucide-lock input-icon"></i>
+                                <input class="form-input" id="confirm-password" type="password" autocomplete="new-password" placeholder="Repeat your password" required>
+                                <button class="toggle-pw" type="button" id="toggle-pw2" aria-label="Show password">
+                                    <i class="lucide-eye" id="pw2-eye"></i>
+                                </button>
+                            </div>
+                            <span class="field-error" id="confirm-password-error"></span>
+                        </div>
+
+                        <div class="form-check" style="align-items:flex-start;gap:10px">
+                            <input type="checkbox" id="terms" class="check-input" style="margin-top:2px">
+                            <label for="terms" class="check-label">
+                                I agree to the <a href="#" class="switch-link">Terms of service</a> and
+                                <a href="#" class="switch-link">Privacy policy</a> of Lusaka City Council.
+                            </label>
+                        </div>
+                        <span class="field-error" id="terms-error"></span>
+
+                        <div class="alert alert--error" id="reg-error" style="display:none">
+                            <i class="lucide-alert-circle"></i>
+                            <span id="reg-error-msg"></span>
+                        </div>
+
+                        <div class="step-nav">
+                            <button class="back-btn" type="button" id="back-2">
+                                <i class="lucide-arrow-left"></i>
+                                Back
+                            </button>
+                            <button class="submit-btn step-next" type="submit" id="reg-submit">
+                                <span class="btn-text">Create account</span>
+                                <span class="btn-spinner" style="display:none"><i class="lucide-loader-2"></i></span>
+                                <i class="lucide-arrow-right btn-arrow"></i>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </form>
+
+                <div class="form-divider"><span>or</span></div>
+
+                <p class="form-switch">
+                    Already have an account?
+                    <a href="login.html" class="switch-link">Sign in →</a>
+                </p>
+
+                <p class="lcc-note">
+                    <i class="lucide-shield-check"></i>
+                    Operated by Lusaka City Council · Zambia
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        lucide.createIcons();
+
+        /* ── Step navigation ───────────────────────────────────────── */
+        let currentStep = 1;
+
+        function goTo(step) {
+            document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+
+            document.querySelectorAll('.step').forEach((el, i) => {
+                el.classList.toggle('active',   i + 1 === step);
+                el.classList.toggle('complete', i + 1 < step);
+            });
+            currentStep = step;
+        }
+
+        document.getElementById('next-1').addEventListener('click', () => {
+            if (validateStep1()) goTo(2);
+        });
+        document.getElementById('back-1').addEventListener('click', () => goTo(1));
+        document.getElementById('next-2').addEventListener('click', () => {
+            if (validateStep2()) goTo(3);
+        });
+        document.getElementById('back-2').addEventListener('click', () => goTo(2));
+
+        /* ── Compound select ───────────────────────────────────────── */
+        document.getElementById('compound').addEventListener('change', function () {
+            const other = document.getElementById('compound-other-wrap');
+            other.style.display = this.value === '__other' ? 'block' : 'none';
+        });
+
+        /* ── GPS detect ────────────────────────────────────────────── */
+        document.getElementById('get-location-btn').addEventListener('click', () => {
+            const statusEl = document.getElementById('location-status');
+            statusEl.textContent = 'Detecting location…';
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    document.getElementById('reg-lat').value = pos.coords.latitude.toFixed(6);
+                    document.getElementById('reg-lng').value = pos.coords.longitude.toFixed(6);
+                    statusEl.textContent = '✓ Location detected';
+                    statusEl.style.color = 'var(--accent)';
+                },
+                () => {
+                    statusEl.textContent = 'Could not detect location. You can enter it manually.';
+                    statusEl.style.color = 'var(--danger)';
+                }
+            );
+        });
+
+        /* ── Password toggles ──────────────────────────────────────── */
+        function setupToggle(btnId, inputId, eyeId) {
+            document.getElementById(btnId).addEventListener('click', () => {
+                const inp = document.getElementById(inputId);
+                const eye = document.getElementById(eyeId);
+                const show = inp.type === 'password';
+                inp.type = show ? 'text' : 'password';
+                eye.className = show ? 'lucide-eye-off' : 'lucide-eye';
+                lucide.createIcons();
+            });
+        }
+        setupToggle('toggle-pw1', 'reg-password', 'pw1-eye');
+        setupToggle('toggle-pw2', 'confirm-password', 'pw2-eye');
+
+        /* ── Password strength ─────────────────────────────────────── */
+        document.getElementById('reg-password').addEventListener('input', function () {
+            const val = this.value;
+            const bar = document.getElementById('strength-bar');
+            const fill = document.getElementById('strength-fill');
+            const label = document.getElementById('strength-label');
+            if (!val) { bar.style.display = 'none'; return; }
+            bar.style.display = 'flex';
+
+            let score = 0;
+            if (val.length >= 8)  score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const levels = [
+                { w: '25%',  color: '#c0392b', text: 'Weak' },
+                { w: '50%',  color: '#d97706', text: 'Fair' },
+                { w: '75%',  color: '#2563eb', text: 'Good' },
+                { w: '100%', color: '#3d7a3a', text: 'Strong' },
+            ];
+            const lvl = levels[Math.max(0, score - 1)];
+            fill.style.width = lvl.w;
+            fill.style.background = lvl.color;
+            label.textContent = lvl.text;
+            label.style.color = lvl.color;
+        });
+
+        /* ── Validation helpers ────────────────────────────────────── */
+        function clearField(id) {
+            const el = document.getElementById(id + '-error');
+            if (el) el.textContent = '';
+            const inp = document.getElementById(id);
+            if (inp) inp.classList.remove('is-error');
+        }
+
+        function setFieldError(id, msg) {
+            const el = document.getElementById(id + '-error');
+            if (el) el.textContent = msg;
+            const inp = document.getElementById(id);
+            if (inp) inp.classList.add('is-error');
+        }
+
+        function validateStep1() {
+            let ok = true;
+            ['first-name','last-name','reg-email'].forEach(clearField);
+
+            const fn = document.getElementById('first-name').value.trim();
+            const ln = document.getElementById('last-name').value.trim();
+            const em = document.getElementById('reg-email').value.trim();
+
+            if (!fn) { setFieldError('first-name', 'First name is required.'); ok = false; }
+            if (!ln) { setFieldError('last-name', 'Last name is required.'); ok = false; }
+            if (!em) { setFieldError('reg-email', 'Email is required.'); ok = false; }
+            else if (!/\S+@\S+\.\S+/.test(em)) { setFieldError('reg-email', 'Enter a valid email address.'); ok = false; }
+            return ok;
+        }
+
+        function validateStep2() {
+            clearField('compound');
+            const sel = document.getElementById('compound').value;
+            if (!sel) { setFieldError('compound', 'Please select your compound.'); return false; }
+            if (sel === '__other' && !document.getElementById('compound-other').value.trim()) {
+                setFieldError('compound', 'Please enter your compound name.'); return false;
+            }
+            return true;
+        }
+
+        function validateStep3() {
+            let ok = true;
+            ['reg-password','confirm-password','terms'].forEach(clearField);
+            const pw  = document.getElementById('reg-password').value;
+            const cpw = document.getElementById('confirm-password').value;
+
+            if (!pw || pw.length < 8) { setFieldError('reg-password', 'Password must be at least 8 characters.'); ok = false; }
+            if (!cpw) { setFieldError('confirm-password', 'Please confirm your password.'); ok = false; }
+            else if (pw !== cpw) { setFieldError('confirm-password', 'Passwords do not match.'); ok = false; }
+            if (!document.getElementById('terms').checked) { setFieldError('terms', 'You must accept the terms to continue.'); ok = false; }
+            return ok;
+        }
+
+        /* ── Form submit ───────────────────────────────────────────── */
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!validateStep3()) return;
+
+            const compoundSel = document.getElementById('compound').value;
+            const compound = compoundSel === '__other'
+                ? document.getElementById('compound-other').value.trim()
+                : compoundSel;
+
+            const lat = parseFloat(document.getElementById('reg-lat').value) || null;
+            const lng = parseFloat(document.getElementById('reg-lng').value) || null;
+
+            const payload = {
+                first_name: document.getElementById('first-name').value.trim(),
+                last_name:  document.getElementById('last-name').value.trim(),
+                email:      document.getElementById('reg-email').value.trim(),
+                phone:      document.getElementById('phone').value.trim() || undefined,
+                password:   document.getElementById('reg-password').value,
+                compound,
+                role: 'resident',
+                ...(lat && lng ? { latitude: lat, longitude: lng } : {}),
+            };
+
+            setRegLoading(true);
+            document.getElementById('reg-error').style.display = 'none';
+
+            try {
+                const res  = await fetch(`${API}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Registration failed.');
+
+                localStorage.setItem('sw_access_token',  data.access_token);
+                localStorage.setItem('sw_refresh_token', data.refresh_token);
+                localStorage.setItem('sw_new_user', '1');
+
+                window.location.href = 'process_login.html';
+
+            } catch (err) {
+                const errEl = document.getElementById('reg-error');
+                document.getElementById('reg-error-msg').textContent = err.message;
+                errEl.style.display = 'flex';
+                setRegLoading(false);
+            }
+        });
+
+        function setRegLoading(on) {
+            const btn = document.getElementById('reg-submit');
+            btn.disabled = on;
+            document.querySelector('#reg-submit .btn-text').style.display   = on ? 'none' : 'inline';
+            document.querySelector('#reg-submit .btn-spinner').style.display = on ? 'inline-flex' : 'none';
+            document.querySelector('#reg-submit .btn-arrow').style.display   = on ? 'none' : 'inline-flex';
+            if (on) lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

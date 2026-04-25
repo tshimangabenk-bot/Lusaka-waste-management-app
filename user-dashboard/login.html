@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in — SmartWaste Lusaka</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <script src="../admin-dashboard/vendor/lucide.js"></script>
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+    <div class="auth-bg" aria-hidden="true">
+        <div class="auth-orb orb-a"></div>
+        <div class="auth-orb orb-b"></div>
+        <div class="auth-pattern"></div>
+    </div>
+
+    <div class="auth-shell">
+
+        <!-- Left panel — branding -->
+        <div class="auth-panel auth-panel--left">
+            <div class="panel-content">
+                <div class="panel-brand">
+                    <div class="brand-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </div>
+                    <span>SmartWaste</span>
+                </div>
+
+                <div class="panel-hero">
+                    <h1 class="panel-headline">Keeping Lusaka<br><em>clean together.</em></h1>
+                    <p class="panel-sub">Track reports, earn green points, and find smart bins near you — all in one place.</p>
+                </div>
+
+                <div class="panel-stats">
+                    <div class="panel-stat">
+                        <span class="pstat-value">12,400+</span>
+                        <span class="pstat-label">Resident reports</span>
+                    </div>
+                    <div class="pstat-divider"></div>
+                    <div class="panel-stat">
+                        <span class="pstat-value">340</span>
+                        <span class="pstat-label">Smart bins</span>
+                    </div>
+                    <div class="pstat-divider"></div>
+                    <div class="panel-stat">
+                        <span class="pstat-value">94%</span>
+                        <span class="pstat-label">Resolution rate</span>
+                    </div>
+                </div>
+
+                <div class="panel-badge">
+                    <i class="lucide-leaf"></i>
+                    <span>Earn green points for every verified report</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right panel — form -->
+        <div class="auth-panel auth-panel--right">
+            <div class="form-shell">
+
+                <div class="form-header">
+                    <h2 class="form-title">Welcome back</h2>
+                    <p class="form-sub">Sign in to your resident account</p>
+                </div>
+
+                <form class="auth-form" id="login-form" novalidate>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email address</label>
+                        <div class="input-wrap">
+                            <i class="lucide-mail input-icon"></i>
+                            <input
+                                class="form-input"
+                                id="email"
+                                type="email"
+                                autocomplete="email"
+                                placeholder="you@example.com"
+                                required
+                            >
+                        </div>
+                        <span class="field-error" id="email-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label class="form-label" for="password">Password</label>
+                            <a class="forgot-link" href="#">Forgot password?</a>
+                        </div>
+                        <div class="input-wrap">
+                            <i class="lucide-lock input-icon"></i>
+                            <input
+                                class="form-input"
+                                id="password"
+                                type="password"
+                                autocomplete="current-password"
+                                placeholder="Enter your password"
+                                required
+                            >
+                            <button class="toggle-pw" type="button" id="toggle-pw" aria-label="Show password">
+                                <i class="lucide-eye" id="pw-eye"></i>
+                            </button>
+                        </div>
+                        <span class="field-error" id="password-error"></span>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" id="remember" class="check-input">
+                        <label for="remember" class="check-label">Keep me signed in</label>
+                    </div>
+
+                    <div class="alert alert--error" id="login-error" style="display:none">
+                        <i class="lucide-alert-circle"></i>
+                        <span id="login-error-msg">Invalid email or password.</span>
+                    </div>
+
+                    <button class="submit-btn" type="submit" id="submit-btn">
+                        <span class="btn-text">Sign in</span>
+                        <span class="btn-spinner" style="display:none"><i class="lucide-loader-2"></i></span>
+                        <i class="lucide-arrow-right btn-arrow"></i>
+                    </button>
+
+                </form>
+
+                <div class="form-divider"><span>or</span></div>
+
+                <p class="form-switch">
+                    Don't have an account?
+                    <a href="register.html" class="switch-link">Create one free →</a>
+                </p>
+
+                <p class="lcc-note">
+                    <i class="lucide-shield-check"></i>
+                    Operated by Lusaka City Council · Zambia
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        lucide.createIcons();
+
+        // Password toggle
+        document.getElementById('toggle-pw').addEventListener('click', () => {
+            const inp = document.getElementById('password');
+            const eye = document.getElementById('pw-eye');
+            const show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            eye.className = show ? 'lucide-eye-off' : 'lucide-eye';
+            lucide.createIcons();
+        });
+
+        // Form submit
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const email    = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            let valid = true;
+
+            if (!email) { showFieldError('email', 'Email is required.'); valid = false; }
+            else if (!/\S+@\S+\.\S+/.test(email)) { showFieldError('email', 'Enter a valid email.'); valid = false; }
+            if (!password) { showFieldError('password', 'Password is required.'); valid = false; }
+            if (!valid) return;
+
+            setLoading(true);
+
+            try {
+                const res  = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Login failed.');
+
+                localStorage.setItem('sw_access_token',  data.access_token);
+                localStorage.setItem('sw_refresh_token', data.refresh_token);
+
+                // Redirect based on role
+                const role = data.user?.role;
+                if (role === 'admin' || role === 'supervisor') {
+                    window.location.href = '../admin-dashboard/index.html';
+                } else {
+                    window.location.href = 'process_login.html';
+                }
+
+            } catch (err) {
+                showFormError(err.message);
+                setLoading(false);
+            }
+        });
+
+        function setLoading(on) {
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = on;
+            document.querySelector('.btn-text').style.display  = on ? 'none' : 'inline';
+            document.querySelector('.btn-spinner').style.display = on ? 'inline-flex' : 'none';
+            document.querySelector('.btn-arrow').style.display  = on ? 'none' : 'inline-flex';
+            if (on) lucide.createIcons();
+        }
+
+        function clearErrors() {
+            ['email','password'].forEach(id => {
+                document.getElementById(`${id}-error`).textContent = '';
+                document.getElementById(id).classList.remove('is-error');
+            });
+            document.getElementById('login-error').style.display = 'none';
+        }
+
+        function showFieldError(field, msg) {
+            document.getElementById(`${field}-error`).textContent = msg;
+            document.getElementById(field).classList.add('is-error');
+        }
+
+        function showFormError(msg) {
+            const el = document.getElementById('login-error');
+            document.getElementById('login-error-msg').textContent = msg;
+            el.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
