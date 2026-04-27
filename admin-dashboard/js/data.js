@@ -3,7 +3,7 @@
    In production, replace these with fetch() calls to your Flask backend.
    ============================================================================ */
 
-const ZONES = [
+let ZONES = [
     { id: 1, name: "Mtendere",         population_est: 85000,  bin_count: 32, avg_fill_pct: 62.3, report_count: 14 },
     { id: 2, name: "George Compound",  population_est: 120000, bin_count: 45, avg_fill_pct: 78.1, report_count: 23 },
     { id: 3, name: "Kalingalinga",     population_est: 60000,  bin_count: 22, avg_fill_pct: 41.7, report_count: 8 },
@@ -62,11 +62,11 @@ function generateBins(count) {
     return bins;
 }
 
-const BINS = generateBins(120);
+let BINS = generateBins(120);
 
 // Collection routes
 const ROUTE_STATUSES = ["planned", "in_progress", "completed", "cancelled"];
-const DRIVERS = [
+let DRIVERS = [
     { id: "d1", name: "Joseph Banda" },
     { id: "d2", name: "Mwila Chisanga" },
     { id: "d3", name: "Brian Tembo" },
@@ -74,7 +74,7 @@ const DRIVERS = [
     { id: "d5", name: "Kennedy Mulenga" },
 ];
 
-const VEHICLES = [
+let VEHICLES = [
     { id: "v1", registration_no: "ALU 1234", vehicle_type: "compactor",   capacity_tons: 8.0,  status: "available",   assigned_driver: "Joseph Banda" },
     { id: "v2", registration_no: "ALU 5678", vehicle_type: "tipper",      capacity_tons: 12.0, status: "on_route",    assigned_driver: "Mwila Chisanga" },
     { id: "v3", registration_no: "ALU 9012", vehicle_type: "compactor",   capacity_tons: 8.0,  status: "maintenance", assigned_driver: null },
@@ -109,7 +109,7 @@ function generateRoutes(count) {
     return routes;
 }
 
-const ROUTES = generateRoutes(25);
+let ROUTES = generateRoutes(25);
 
 // Citizen reports
 const REPORT_CATEGORIES = ["illegal_dumping", "overflowing_bin", "missed_collection", "hazardous_waste", "other"];
@@ -156,7 +156,7 @@ function generateReports(count) {
     return reports;
 }
 
-const REPORTS = generateReports(45);
+let REPORTS = generateReports(45);
 
 // Alerts
 const ALERT_MESSAGES = [
@@ -198,10 +198,10 @@ function generateAlerts(count) {
     return alerts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 
-const ALERTS = generateAlerts(40);
+let ALERTS = generateAlerts(40);
 
 // Reward catalog
-const REWARD_CATALOG = [
+let REWARD_CATALOG = [
     { id: 1, title: "Mobile Airtime ZMW 10",    description: "Redeemable for ZMW 10 airtime on any network", points_cost: 100, stock: 487, is_active: true },
     { id: 2, title: "Shopping Voucher ZMW 25",   description: "Valid at partner supermarkets",                points_cost: 250, stock: 189, is_active: true },
     { id: 3, title: "Tree Seedling",             description: "Collect a free tree seedling from LCC nursery",points_cost: 50,  stock: 943, is_active: true },
@@ -251,10 +251,13 @@ function generateUsers(count) {
     return users;
 }
 
-const USERS = generateUsers(65);
+let USERS = generateUsers(65);
 
-// ML Models
-const ML_MODELS = [
+// Analytics (populated from API; seeded with fallback)
+let ANALYTICS = { trend: { labels: [], actual: [], predicted: [] }, ml_models: [] };
+
+// ML Models (fallback until API loads)
+let ML_MODELS = [
     { id: 1, model_name: "Waste Volume Predictor",   version: "2.1.0", accuracy: 0.9210, trained_at: "2026-03-08T14:30:00Z", is_active: true },
     { id: 2, model_name: "Waste Volume Predictor",   version: "2.0.3", accuracy: 0.8940, trained_at: "2026-02-20T10:15:00Z", is_active: false },
     { id: 3, model_name: "Fill Rate Forecaster",     version: "1.3.0", accuracy: 0.8760, trained_at: "2026-03-05T09:00:00Z", is_active: true },

@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "public": "user-dashboard",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "destination": "/api/**"
+      }
+    ]
+  }
+}

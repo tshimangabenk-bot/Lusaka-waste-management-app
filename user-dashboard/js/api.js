@@ -3,7 +3,12 @@
    Wraps all backend calls with JWT auth handling
    ============================================================================ */
 
-const API_BASE = 'http://localhost:5000/api';
+// API_BASE is defined in js/config.js — edit that file to change the server URL.
+
+// Automatically set to false after the first connection failure so
+// subsequent calls skip the network and go straight to demo fallbacks.
+let _backendAvailable = true;
+let _backendCheckPending = false;
 
 function getToken()  { return localStorage.getItem('sw_access_token'); }
 function getRToken() { return localStorage.getItem('sw_refresh_token'); }
@@ -34,15 +39,30 @@ async function tryRefresh() {
 }
 
 async function apiFetch(path, options = {}, retry = true) {
+    // Skip network if we already know the backend is unreachable
+    if (!_backendAvailable) {
+        throw new Error('Backend unavailable — using demo data');
+    }
+
     const token = getToken();
-    const res = await fetch(API_BASE + path, {
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-            ...(options.headers || {}),
-        },
-    });
+    let res;
+    try {
+        res = await fetch(API_BASE + path, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+                ...(options.headers || {}),
+            },
+        });
+    } catch (networkErr) {
+        // Connection refused / offline — disable further attempts this session
+        if (_backendAvailable) {
+            console.info('SmartWaste: backend unreachable at', API_BASE, '— switching to demo mode.');
+        }
+        _backendAvailable = false;
+        throw new Error('Backend unavailable — using demo data');
+    }
 
     if (res.status === 401 && retry) {
         const ok = await tryRefresh();
@@ -57,6 +77,8 @@ async function apiFetch(path, options = {}, retry = true) {
         throw new Error(err.error || `HTTP ${res.status}`);
     }
 
+    // Successful response — backend is reachable
+    _backendAvailable = true;
     return res.json();
 }
 

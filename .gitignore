@@ -1,0 +1,46 @@
+# === Secrets & credentials ===
+.env
+backend/.env
+backend/firebase-credentials.json
+*.key
+*.pem
+*.p12
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+env/
+.env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+instance/
+
+# === Node / Firebase CLI ===
+node_modules/
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+
+# === Logs ===
+*.log
+
+# === Claude Code ===
+.claude/
+
+# === IDE ===
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -8,10 +8,12 @@
         content="SmartWaste Lusaka — Resident Portal. Track your reports, earn green points, find nearby bins, and help keep Lusaka clean.">
     <title>SmartWaste — Resident Portal | Lusaka</title>
 
+    <!-- Google Fonts — Inter + JetBrains Mono (matches admin) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+    <!-- Icons, Map, Charts -->
     <script src="vendor/dashboard/vendor/lucide.js"></script>
     <link rel="stylesheet" href="vendor/dashboard/vendor/leaflet.css" />
     <script src="vendor/dashboard/vendor/chart.js"></script>
@@ -22,45 +24,36 @@
 
 <body>
 
-    <!-- Ambient background -->
-    <div class="ambient" aria-hidden="true">
-        <div class="ambient-orb orb-1"></div>
-        <div class="ambient-orb orb-2"></div>
-        <div class="ambient-orb orb-3"></div>
-    </div>
+    <!-- Background Glows -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
 
-    <div class="app-shell">
+    <div class="app-layout">
 
         <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
         <aside class="sidebar" id="sidebar">
 
-            <div class="sidebar-top">
-                <div class="brand">
-                    <div class="brand-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-                            <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
-                        </svg>
-                    </div>
-                    <div class="brand-text">
-                        <span class="brand-name">SmartWaste</span>
-                        <span class="brand-sub">Resident Portal</span>
-                    </div>
+            <!-- Brand header -->
+            <div class="sidebar-header">
+                <div class="sidebar-logo">♻️</div>
+                <div class="sidebar-brand">
+                    <h1>SmartWaste</h1>
+                    <span>Resident Portal</span>
                 </div>
+            </div>
 
-                <!-- User card inside sidebar -->
+            <!-- User card + points -->
+            <div class="sidebar-user-section">
                 <div class="sidebar-user" id="sidebar-user">
-                    <div class="sidebar-avatar" id="sidebar-avatar">JD</div>
-                    <div class="sidebar-user-info">
-                        <span class="sidebar-user-name" id="sidebar-user-name">Loading…</span>
-                        <span class="sidebar-user-compound" id="sidebar-user-compound">—</span>
+                    <div class="user-avatar" id="sidebar-avatar">JD</div>
+                    <div class="user-info">
+                        <div class="name" id="sidebar-user-name">Loading…</div>
+                        <div class="role" id="sidebar-user-compound">—</div>
                     </div>
-                    <div class="verified-dot" id="verified-dot" title="Verified resident" style="display:none">
+                    <div class="verified-dot" id="verified-dot" title="Verified resident">
                         <i class="lucide-shield-check"></i>
                     </div>
                 </div>
-
-                <!-- Points pill -->
                 <div class="points-pill" id="sidebar-points">
                     <i class="lucide-leaf"></i>
                     <span id="points-value">—</span>
@@ -68,6 +61,7 @@
                 </div>
             </div>
 
+            <!-- Nav -->
             <nav class="sidebar-nav">
                 <div class="nav-group">
                     <span class="nav-group-label">My Space</span>
@@ -108,251 +102,260 @@
             </div>
         </aside>
 
-        <!-- ═══════════════════════ MAIN ═══════════════════════ -->
-        <main class="main" id="main">
+        <!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
+        <main class="main-content" id="mainContent">
 
-            <!-- Top bar -->
-            <header class="topbar">
-                <button class="mobile-menu-btn" id="mobile-menu-btn" type="button" aria-label="Open menu">
-                    <i class="lucide-menu"></i>
-                </button>
-                <div class="topbar-title" id="topbar-title">Overview</div>
-                <div class="topbar-actions">
-                    <button class="action-btn" id="new-report-btn" type="button" title="Submit a report">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle sidebar">
+                        <i class="lucide-menu"></i>
+                    </button>
+                    <div class="page-title-section">
+                        <h2 id="topbar-title">Overview</h2>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="action-btn" id="new-report-btn" type="button">
                         <i class="lucide-plus"></i>
                         <span>Report issue</span>
                     </button>
                 </div>
             </header>
 
-            <!-- ─── PAGE: OVERVIEW ─── -->
-            <section class="page active" id="page-overview">
+            <div class="page-container">
 
-                <div class="page-hero">
-                    <div class="hero-text">
-                        <p class="hero-greeting" id="hero-greeting">Good morning</p>
-                        <h2 class="hero-name" id="hero-name">Loading…</h2>
-                        <p class="hero-sub">Here's your waste-free week at a glance.</p>
-                    </div>
-                    <div class="hero-badge">
-                        <div class="hero-badge-inner">
-                            <i class="lucide-leaf"></i>
-                            <span id="hero-points">—</span>
-                            <small>pts</small>
-                        </div>
-                        <p>Green Points</p>
-                    </div>
-                </div>
+                <!-- ══════════════ PAGE: OVERVIEW ══════════════ -->
+                <section class="page-section active" id="page-overview">
 
-                <!-- Stats strip -->
-                <div class="stats-strip">
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon--blue">
-                            <i class="lucide-flag"></i>
+                    <div class="page-hero">
+                        <div class="hero-text">
+                            <p class="hero-greeting" id="hero-greeting">Good morning,</p>
+                            <h2 class="hero-name" id="hero-name">Loading…</h2>
+                            <p class="hero-sub">Here's your waste-free week at a glance.</p>
                         </div>
-                        <div class="stat-body">
-                            <span class="stat-value" id="stat-total">—</span>
-                            <span class="stat-label">Total reports</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon--amber">
-                            <i class="lucide-clock"></i>
-                        </div>
-                        <div class="stat-body">
-                            <span class="stat-value" id="stat-pending">—</span>
-                            <span class="stat-label">Pending</span>
+                        <div class="hero-badge">
+                            <div class="hero-badge-inner">
+                                <i class="lucide-leaf"></i>
+                                <span id="hero-points">—</span>
+                                <small>pts</small>
+                            </div>
+                            <p>Green Points</p>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon--green">
-                            <i class="lucide-check-circle-2"></i>
-                        </div>
-                        <div class="stat-body">
-                            <span class="stat-value" id="stat-resolved">—</span>
-                            <span class="stat-label">Resolved</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon stat-icon--purple">
-                            <i class="lucide-trophy"></i>
-                        </div>
-                        <div class="stat-body">
-                            <span class="stat-value" id="stat-lifetime">—</span>
-                            <span class="stat-label">Lifetime points</span>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="two-col">
-                    <!-- Recent reports -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Recent reports</h3>
-                            <button class="link-btn" data-page="reports" type="button">View all →</button>
+                    <!-- Stats strip -->
+                    <div class="stats-strip">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--blue">
+                                <i class="lucide-flag"></i>
+                            </div>
+                            <div class="stat-body">
+                                <span class="stat-value" id="stat-total">—</span>
+                                <span class="stat-label">Total reports</span>
+                            </div>
                         </div>
-                        <div class="card-body" id="overview-reports">
-                            <div class="skeleton-list">
-                                <div class="skeleton"></div>
-                                <div class="skeleton"></div>
-                                <div class="skeleton"></div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--amber">
+                                <i class="lucide-clock"></i>
+                            </div>
+                            <div class="stat-body">
+                                <span class="stat-value" id="stat-pending">—</span>
+                                <span class="stat-label">Pending</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--green">
+                                <i class="lucide-check-circle-2"></i>
+                            </div>
+                            <div class="stat-body">
+                                <span class="stat-value" id="stat-resolved">—</span>
+                                <span class="stat-label">Resolved</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--purple">
+                                <i class="lucide-trophy"></i>
+                            </div>
+                            <div class="stat-body">
+                                <span class="stat-value" id="stat-lifetime">—</span>
+                                <span class="stat-label">Lifetime points</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Points activity -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Points activity</h3>
-                            <button class="link-btn" data-page="rewards" type="button">Redeem →</button>
+                    <div class="two-col">
+                        <!-- Recent reports -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-flag"></i> Recent reports</h3>
+                                <button class="link-btn" data-page="reports" type="button">View all →</button>
+                            </div>
+                            <div class="card-body" id="overview-reports">
+                                <div class="skeleton-list">
+                                    <div class="skeleton"></div>
+                                    <div class="skeleton"></div>
+                                    <div class="skeleton"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body" id="overview-transactions">
-                            <div class="skeleton-list">
-                                <div class="skeleton"></div>
-                                <div class="skeleton"></div>
-                                <div class="skeleton"></div>
+
+                        <!-- Points activity -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-leaf"></i> Points activity</h3>
+                                <button class="link-btn" data-page="rewards" type="button">Redeem →</button>
+                            </div>
+                            <div class="card-body" id="overview-transactions">
+                                <div class="skeleton-list">
+                                    <div class="skeleton"></div>
+                                    <div class="skeleton"></div>
+                                    <div class="skeleton"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-            </section>
+                </section>
 
-            <!-- ─── PAGE: MY REPORTS ─── -->
-            <section class="page" id="page-reports">
+                <!-- ══════════════ PAGE: MY REPORTS ══════════════ -->
+                <section class="page-section" id="page-reports">
 
-                <div class="page-header">
-                    <div>
-                        <h2>My Reports</h2>
-                        <p class="page-sub">Issues you've submitted to Lusaka City Council</p>
-                    </div>
-                    <button class="primary-btn" id="submit-report-btn" type="button">
-                        <i class="lucide-plus"></i>
-                        New report
-                    </button>
-                </div>
-
-                <!-- Filter tabs -->
-                <div class="filter-tabs" role="tablist">
-                    <button class="filter-tab active" data-filter="all" role="tab">All</button>
-                    <button class="filter-tab" data-filter="pending" role="tab">Pending</button>
-                    <button class="filter-tab" data-filter="in_progress" role="tab">In progress</button>
-                    <button class="filter-tab" data-filter="resolved" role="tab">Resolved</button>
-                </div>
-
-                <div class="reports-grid" id="reports-grid">
-                    <div class="loading-state">
-                        <i class="lucide-loader-2"></i>
-                        <span>Loading reports…</span>
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- ─── PAGE: REWARDS ─── -->
-            <section class="page" id="page-rewards">
-
-                <div class="page-header">
-                    <div>
-                        <h2>Rewards</h2>
-                        <p class="page-sub">Redeem your green points for real benefits</p>
-                    </div>
-                </div>
-
-                <!-- Balance card -->
-                <div class="balance-banner">
-                    <div class="balance-left">
-                        <div class="balance-icon"><i class="lucide-leaf"></i></div>
+                    <div class="page-header">
                         <div>
-                            <span class="balance-label">Available balance</span>
-                            <span class="balance-value" id="balance-points">—</span>
+                            <h2>My Reports</h2>
+                            <p class="page-sub">Issues you've submitted to Lusaka City Council</p>
                         </div>
+                        <button class="btn btn-primary" id="submit-report-btn" type="button">
+                            <i class="lucide-plus"></i>
+                            New report
+                        </button>
                     </div>
-                    <div class="balance-right">
-                        <span class="balance-lifetime-label">Lifetime earned</span>
-                        <span class="balance-lifetime" id="balance-lifetime">—</span>
-                    </div>
-                </div>
 
-                <!-- Catalog -->
-                <h3 class="section-title">Catalog</h3>
-                <div class="catalog-grid" id="catalog-grid">
-                    <div class="loading-state">
-                        <i class="lucide-loader-2"></i>
-                        <span>Loading catalog…</span>
+                    <!-- Filter tabs -->
+                    <div class="filter-tabs" role="tablist">
+                        <button class="filter-tab active" data-filter="all" role="tab">All</button>
+                        <button class="filter-tab" data-filter="pending" role="tab">Pending</button>
+                        <button class="filter-tab" data-filter="in_progress" role="tab">In progress</button>
+                        <button class="filter-tab" data-filter="resolved" role="tab">Resolved</button>
                     </div>
-                </div>
 
-                <!-- Transaction history -->
-                <h3 class="section-title" style="margin-top:2rem">Points history</h3>
-                <div class="card">
-                    <div class="card-body" id="rewards-history">
+                    <div class="reports-grid" id="reports-grid">
                         <div class="loading-state">
                             <i class="lucide-loader-2"></i>
-                            <span>Loading…</span>
+                            <span>Loading reports…</span>
                         </div>
                     </div>
-                </div>
 
-            </section>
+                </section>
 
-            <!-- ─── PAGE: NEARBY BINS ─── -->
-            <section class="page" id="page-bins">
+                <!-- ══════════════ PAGE: REWARDS ══════════════ -->
+                <section class="page-section" id="page-rewards">
 
-                <div class="page-header">
-                    <div>
-                        <h2>Nearby Bins</h2>
-                        <p class="page-sub">Smart waste bins within 1 km of your location</p>
+                    <div class="page-header">
+                        <div>
+                            <h2>Rewards</h2>
+                            <p class="page-sub">Redeem your green points for real benefits</p>
+                        </div>
                     </div>
-                    <button class="primary-btn" id="locate-btn" type="button">
-                        <i class="lucide-locate"></i>
-                        Use my location
-                    </button>
-                </div>
 
-                <div class="map-layout">
-                    <div id="bins-map" class="bins-map"></div>
-                    <div class="bins-list-panel">
-                        <div class="bins-list-header">Bins nearby</div>
-                        <div id="bins-list" class="bins-list">
-                            <div class="empty-state">
-                                <i class="lucide-map-pin-off"></i>
-                                <p>Allow location access to find bins near you</p>
+                    <!-- Balance card -->
+                    <div class="balance-banner">
+                        <div class="balance-left">
+                            <div class="balance-icon"><i class="lucide-leaf"></i></div>
+                            <div>
+                                <span class="balance-label">Available balance</span>
+                                <span class="balance-value" id="balance-points">—</span>
+                            </div>
+                        </div>
+                        <div class="balance-right">
+                            <span class="balance-lifetime-label">Lifetime earned</span>
+                            <span class="balance-lifetime" id="balance-lifetime">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Catalog -->
+                    <h3 class="section-title">Catalog</h3>
+                    <div class="catalog-grid" id="catalog-grid">
+                        <div class="loading-state">
+                            <i class="lucide-loader-2"></i>
+                            <span>Loading catalog…</span>
+                        </div>
+                    </div>
+
+                    <!-- Transaction history -->
+                    <h3 class="section-title" style="margin-top:2rem">Points history</h3>
+                    <div class="card">
+                        <div class="card-body" id="rewards-history">
+                            <div class="loading-state">
+                                <i class="lucide-loader-2"></i>
+                                <span>Loading…</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-            </section>
+                </section>
 
-            <!-- ─── PAGE: NOTIFICATIONS ─── -->
-            <section class="page" id="page-notifications">
+                <!-- ══════════════ PAGE: NEARBY BINS ══════════════ -->
+                <section class="page-section" id="page-bins">
 
-                <div class="page-header">
-                    <div>
-                        <h2>Notifications</h2>
-                        <p class="page-sub">Updates from Lusaka City Council</p>
+                    <div class="page-header">
+                        <div>
+                            <h2>Nearby Bins</h2>
+                            <p class="page-sub">Smart waste bins within 1 km of your location</p>
+                        </div>
+                        <button class="btn btn-primary" id="locate-btn" type="button">
+                            <i class="lucide-locate"></i>
+                            Use my location
+                        </button>
                     </div>
-                    <button class="secondary-btn" id="mark-all-read-btn" type="button">Mark all read</button>
-                </div>
 
-                <div class="card">
-                    <div class="card-body" id="notifications-list">
-                        <div class="loading-state">
-                            <i class="lucide-loader-2"></i>
-                            <span>Loading…</span>
+                    <div class="map-layout">
+                        <div id="bins-map" class="bins-map"></div>
+                        <div class="bins-list-panel">
+                            <div class="bins-list-header">Bins nearby</div>
+                            <div id="bins-list" class="bins-list">
+                                <div class="empty-state">
+                                    <i class="lucide-map-pin-off"></i>
+                                    <p>Allow location access to find bins near you</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-            </section>
+                </section>
 
+                <!-- ══════════════ PAGE: NOTIFICATIONS ══════════════ -->
+                <section class="page-section" id="page-notifications">
+
+                    <div class="page-header">
+                        <div>
+                            <h2>Notifications</h2>
+                            <p class="page-sub">Updates from Lusaka City Council</p>
+                        </div>
+                        <button class="btn btn-secondary" id="mark-all-read-btn" type="button">
+                            <i class="lucide-check-check"></i>
+                            Mark all read
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body" id="notifications-list">
+                            <div class="loading-state">
+                                <i class="lucide-loader-2"></i>
+                                <span>Loading…</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
+            </div><!-- .page-container -->
         </main>
-    </div>
 
-    <!-- ═══════════════════════ MODALS ═══════════════════════ -->
+    </div><!-- .app-layout -->
 
-    <!-- Submit Report Modal -->
+    <!-- ═══════════════════════ MODAL: Submit Report ═══════════════════════ -->
     <div class="modal-backdrop" id="report-modal" aria-hidden="true">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
             <div class="modal-header">
@@ -403,8 +406,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="secondary-btn" id="cancel-report-modal" type="button">Cancel</button>
-                <button class="primary-btn" id="submit-report-form" type="button">
+                <button class="btn btn-secondary" id="cancel-report-modal" type="button">Cancel</button>
+                <button class="btn btn-primary" id="submit-report-form" type="button">
                     <i class="lucide-send"></i>
                     Submit report
                 </button>
@@ -415,6 +418,23 @@
     <!-- Toast -->
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
+    <!-- Lucide icon initializer -->
+    <script>
+    (function() {
+        document.querySelectorAll('[class*="lucide-"]').forEach(el => {
+            const cls = [...el.classList].find(c => c.startsWith('lucide-'));
+            if (cls) el.setAttribute('data-lucide', cls.replace('lucide-', ''));
+        });
+        lucide.createIcons();
+    })();
+    </script>
+
+    <!-- Firebase JS SDK (compat) — required for FCM browser push -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="js/api.js"></script>
     <script src="js/app.js"></script>
 

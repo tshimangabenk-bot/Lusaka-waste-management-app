@@ -6,7 +6,7 @@
     <title>Loading — SmartWaste Lusaka</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src="../admin-dashboard/vendor/lucide.js"></script>
     <link rel="stylesheet" href="css/auth.css">
 
@@ -25,7 +25,7 @@
         }
 
         .process-card {
-            background: #fff;
+            background: var(--bg-card, #1a2332);
             border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-xl);
@@ -43,7 +43,7 @@
         /* Animated logo mark */
         .process-logo {
             width: 80px; height: 80px;
-            background: var(--bg-dark);
+            background: linear-gradient(135deg, #10b981, #059669);
             border-radius: 22px;
             display: flex;
             align-items: center;
@@ -62,14 +62,14 @@
         }
         @keyframes shimmer-logo { to { transform: translateX(100%); } }
 
-        .process-logo svg { color: #8ecb86; }
+        .process-logo svg { color: #fff; }
 
         .process-brand {
             font-weight: 800;
             font-size: 1.05rem;
-            color: var(--text-dark);
+            color: var(--text-dark, #f1f5f9);
             margin-bottom: 6px;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
         }
 
         /* Steps list */
@@ -90,8 +90,8 @@
             text-align: left;
             transition: background var(--t-fast);
         }
-        .step-row.active { background: var(--accent-light); }
-        .step-row.done   { opacity: 0.65; }
+        .step-row.active { background: rgba(16,185,129,0.06); }
+        .step-row.done   { opacity: 0.55; }
 
         .step-row-icon {
             width: 34px; height: 34px;
@@ -103,37 +103,37 @@
             flex-shrink: 0;
             transition: all var(--t-base);
         }
-        .step-row-icon.pending  { background: var(--bg-muted); color: var(--text-muted); border: 2px solid var(--border); }
-        .step-row-icon.spinning { background: var(--accent-light); color: var(--accent); border: 2px solid var(--accent); animation: spin 1s linear infinite; }
-        .step-row-icon.done     { background: var(--accent); color: #fff; border: 2px solid var(--accent); }
-        .step-row-icon.error    { background: #fef2f2; color: var(--danger); border: 2px solid var(--danger); }
+        .step-row-icon.pending  { background: rgba(255,255,255,0.04); color: #64748b; border: 2px solid rgba(255,255,255,0.08); }
+        .step-row-icon.spinning { background: rgba(16,185,129,0.12); color: #10b981; border: 2px solid #10b981; animation: spin 1s linear infinite; }
+        .step-row-icon.done     { background: #10b981; color: #fff; border: 2px solid #10b981; }
+        .step-row-icon.error    { background: rgba(239,68,68,0.1); color: var(--danger, #ef4444); border: 2px solid var(--danger, #ef4444); }
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
         .step-row-label {
             font-size: 0.88rem;
             font-weight: 500;
-            color: var(--text-dark);
+            color: #f1f5f9;
             flex: 1;
         }
-        .step-row-label.muted { color: var(--text-muted); }
+        .step-row-label.muted { color: #64748b; }
 
         .step-row-time {
             font-size: 0.72rem;
-            color: var(--text-muted);
+            color: #64748b;
         }
 
         /* Progress bar */
         .progress-track {
             height: 4px;
-            background: var(--border);
+            background: rgba(255,255,255,0.08);
             border-radius: 100px;
             overflow: hidden;
             margin: 4px 0 28px;
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--accent-mid));
+            background: linear-gradient(90deg, #10b981, #34d399);
             border-radius: 100px;
             width: 0%;
             transition: width 0.6s var(--ease);
@@ -142,7 +142,7 @@
         /* Status message */
         .status-msg {
             font-size: 0.85rem;
-            color: var(--text-muted);
+            color: #64748b;
             min-height: 22px;
             transition: opacity var(--t-base);
         }
@@ -157,13 +157,13 @@
         .success-icon {
             width: 64px; height: 64px;
             border-radius: 50%;
-            background: var(--accent-light);
-            border: 2px solid var(--accent);
+            background: rgba(16,185,129,0.12);
+            border: 2px solid #10b981;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.6rem;
-            color: var(--accent);
+            color: #10b981;
             animation: popIn 0.4s var(--ease);
             margin: 0 auto 8px;
         }
@@ -172,27 +172,26 @@
             to   { transform: scale(1); opacity: 1; }
         }
         .success-title {
-            font-family: var(--font-display);
             font-size: 1.6rem;
-            color: var(--text-dark);
-            font-style: italic;
-            font-weight: 400;
+            color: var(--text-dark, #f1f5f9);
+            font-weight: 800;
+            letter-spacing: -0.03em;
         }
-        .success-sub { font-size: 0.85rem; color: var(--text-muted); }
+        .success-sub { font-size: 0.85rem; color: var(--text-muted, #64748b); }
 
         /* Welcome banner (new users) */
         .welcome-banner {
             display: none;
-            background: var(--accent-light);
-            border: 1px solid rgba(61,122,58,0.2);
-            border-radius: var(--radius-md);
+            background: rgba(16,185,129,0.08);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: var(--radius-md, 12px);
             padding: 14px 18px;
             gap: 10px;
             align-items: center;
             text-align: left;
             margin-top: 16px;
             font-size: 0.82rem;
-            color: var(--accent-text);
+            color: #10b981;
         }
         .welcome-banner i { flex-shrink: 0; font-size: 1rem; }
 
@@ -206,30 +205,31 @@
         .error-icon {
             width: 64px; height: 64px;
             border-radius: 50%;
-            background: #fef2f2;
-            border: 2px solid var(--danger);
+            background: rgba(239,68,68,0.1);
+            border: 2px solid #ef4444;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.6rem;
-            color: var(--danger);
+            color: #ef4444;
             margin: 0 auto 8px;
         }
-        .error-title { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); }
-        .error-sub   { font-size: 0.83rem; color: var(--text-muted); }
+        .error-title { font-size: 1.05rem; font-weight: 700; color: var(--text-dark, #f1f5f9); }
+        .error-sub   { font-size: 0.83rem; color: var(--text-muted, #64748b); }
         .retry-btn {
             margin-top: 8px;
             padding: 9px 24px;
-            background: var(--bg-dark);
+            background: linear-gradient(135deg, #10b981, #059669);
             color: #fff;
-            border-radius: var(--radius-sm);
+            border-radius: var(--radius-sm, 8px);
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             border: none;
-            transition: opacity var(--t-fast);
+            transition: opacity var(--t-fast, 0.15s ease);
+            box-shadow: 0 4px 14px rgba(16,185,129,0.25);
         }
-        .retry-btn:hover { opacity: 0.85; }
+        .retry-btn:hover { opacity: 0.88; }
 
         @media (max-width: 500px) {
             .process-card { padding: 36px 24px; }
@@ -306,8 +306,9 @@
         </div>
     </div>
 
+    <script src="js/config.js"></script>
     <script>
-        const API = 'http://localhost:5000/api';
+        const API = API_BASE;
         lucide.createIcons();
 
         const token    = localStorage.getItem('sw_access_token');

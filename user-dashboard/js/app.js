@@ -14,13 +14,9 @@ let activeFilter  = 'all';
 document.addEventListener('DOMContentLoaded', async () => {
     lucide.createIcons();
 
-    // Guard: if no token, redirect to login
-    // (remove this block during development to bypass auth)
-    // if (!getToken()) { window.location.href = 'login.html'; return; }
-
     setupNav();
     setupModals();
-    setupMobileMenu();
+    setupSidebarToggle();
 
     await loadDashboard();
 });
@@ -41,11 +37,11 @@ function navigateTo(page) {
     });
 
     // Update pages
-    document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
     const target = document.getElementById(`page-${page}`);
     if (target) target.classList.add('active');
 
-    // Update topbar title
+    // Update header title
     const titles = {
         overview:      'Overview',
         reports:       'My Reports',
@@ -69,13 +65,29 @@ function navigateTo(page) {
     lucide.createIcons();
 }
 
-// ── Mobile menu ───────────────────────────────────────────────────────────────
-function setupMobileMenu() {
-    const btn     = document.getElementById('mobile-menu-btn');
+// ── Sidebar toggle ────────────────────────────────────────────────────────────
+function setupSidebarToggle() {
+    const btn     = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
-    btn.addEventListener('click', () => sidebar.classList.toggle('open'));
+    const main    = document.getElementById('mainContent');
+
+    btn.addEventListener('click', () => {
+        // On mobile (<768px) — slide in/out
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('open');
+        } else {
+            // On desktop — collapse/expand
+            sidebar.classList.toggle('collapsed');
+            main.classList.toggle('sidebar-collapsed');
+        }
+        lucide.createIcons();
+    });
+
+    // Close mobile sidebar when clicking outside
     document.addEventListener('click', e => {
-        if (!sidebar.contains(e.target) && !btn.contains(e.target)) {
+        if (window.innerWidth <= 768 &&
+            !sidebar.contains(e.target) &&
+            !btn.contains(e.target)) {
             sidebar.classList.remove('open');
         }
     });
@@ -87,13 +99,71 @@ async function loadDashboard() {
         dashData = await apiGetDashboard();
         renderSidebar();
         renderOverview();
-    } catch (err) {
-        console.error('Dashboard load failed:', err);
-        // Render demo data so the UI is visible without a backend
+        registerFcmToken();
+    } catch {
+        // Backend is offline — silently fall back to demo data
         dashData = getDemoData();
         renderSidebar();
         renderOverview();
+        showDemoBanner();
     }
+}
+
+async function registerFcmToken() {
+    if (!('Notification' in window) || !getToken()) return;
+    if (Notification.permission === 'denied') return;
+    if (typeof firebase === 'undefined' || !firebase.apps?.length) return;
+
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') return;
+
+        // Register the service worker for background messages
+        let swReg;
+        if ('serviceWorker' in navigator) {
+            swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        }
+
+        const messaging = firebase.messaging();
+        const fcmToken  = await messaging.getToken({
+            vapidKey:        window.FIREBASE_VAPID_KEY || '',
+            serviceWorkerRegistration: swReg,
+        });
+
+        if (fcmToken) {
+            await apiFetch('/users/me/fcm-token', {
+                method: 'PUT',
+                body: JSON.stringify({ fcm_token: fcmToken }),
+            });
+        }
+
+        // Handle foreground messages (app is open)
+        messaging.onMessage(payload => {
+            const { title, body } = payload.notification || {};
+            showToast(`${title}: ${body}`, 'success');
+        });
+    } catch { /* FCM not configured or user denied — skip silently */ }
+}
+
+function showDemoBanner() {
+    const banner = document.createElement('div');
+    banner.id = 'demo-banner';
+    banner.innerHTML = `
+        <i data-lucide="wifi-off"></i>
+        <span>Demo mode — backend offline. Showing sample data.</span>
+        <button onclick="this.parentElement.remove()" title="Dismiss" style="margin-left:auto;background:none;border:none;cursor:pointer;color:inherit;font-size:1rem;">✕</button>
+    `;
+    banner.style.cssText = `
+        position:fixed;top:0;left:0;right:0;z-index:9999;
+        display:flex;align-items:center;gap:10px;
+        padding:10px 20px;
+        background:rgba(245,158,11,0.15);
+        border-bottom:1px solid rgba(245,158,11,0.35);
+        color:#f59e0b;font-size:0.82rem;font-weight:600;
+        font-family:inherit;
+    `;
+    document.body.prepend(banner);
+    lucide.createIcons();
 }
 
 function getDemoData() {
@@ -441,7 +511,15 @@ async function loadNotifications() {
     el.innerHTML = '<div class="loading-state"><i class="lucide-loader-2"></i><span>Loading…</span></div>';
     lucide.createIcons();
 
-    const notifs = dashData?.notifications || [];
+    let notifs = [];
+    try {
+        notifs = await apiGetNotifications();
+        // Keep dashData in sync for badge count
+        if (dashData) dashData.notifications = notifs;
+    } catch {
+        notifs = dashData?.notifications || [];
+    }
+
     if (!notifs.length) {
         el.innerHTML = '<div class="empty-state"><i class="lucide-bell-off"></i><p>No notifications yet.</p></div>';
     } else {
@@ -459,7 +537,10 @@ async function loadNotifications() {
     lucide.createIcons();
 }
 
-document.getElementById('mark-all-read-btn').addEventListener('click', () => {
+document.getElementById('mark-all-read-btn').addEventListener('click', async () => {
+    try {
+        await apiFetch('/users/me/notifications/mark-all-read', { method: 'PATCH' });
+    } catch { /* best-effort */ }
     if (dashData) dashData.notifications.forEach(n => n.is_read = true);
     document.getElementById('badge-notifs').style.display = 'none';
     loadNotifications();

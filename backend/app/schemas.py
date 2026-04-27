@@ -40,7 +40,6 @@ class ZoneSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Zone
         load_instance = True
-        exclude = ("boundary",)
 
 
 # ── Smart Bins ─────────────────────────────────────────────────────────
@@ -48,11 +47,8 @@ class SmartBinSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = SmartBin
         load_instance = True
-        exclude = ("location",)
 
-    latitude  = ma.Float(dump_only=True)
-    longitude = ma.Float(dump_only=True)
-    zone      = ma.Nested(ZoneSchema, dump_only=True)
+    zone = ma.Nested(ZoneSchema, dump_only=True)
 
 
 class SmartBinCreateSchema(ma.Schema):
@@ -89,12 +85,9 @@ class ReportSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Report
         load_instance = True
-        exclude = ("location",)
 
-    latitude  = ma.Float(dump_only=True)
-    longitude = ma.Float(dump_only=True)
-    images    = ma.Nested(ReportImageSchema, many=True, dump_only=True)
-    reporter  = ma.Nested(UserSchema, dump_only=True)
+    images   = ma.Nested(ReportImageSchema, many=True, dump_only=True)
+    reporter = ma.Nested(UserSchema, dump_only=True)
 
 
 class ReportCreateSchema(ma.Schema):
@@ -111,7 +104,6 @@ class VehicleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Vehicle
         load_instance = True
-        exclude = ("current_location",)
 
 
 # ── Routes ─────────────────────────────────────────────────────────────
@@ -127,7 +119,6 @@ class CollectionRouteSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = CollectionRoute
         load_instance = True
-        exclude = ("route_geometry",)
 
     stops = ma.Nested(RouteStopSchema, many=True, dump_only=True)
 

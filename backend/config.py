@@ -13,12 +13,15 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
 
     # ── Database ────────────────────────────────────────────────────────
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:password@localhost:5432/smart_waste_lusaka",
-    )
+    _db_url = os.getenv("DATABASE_URL", "sqlite:///smart_waste.db")
+    SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_size": 10}
+    # SQLite needs check_same_thread=False for Flask's threaded request handling
+    SQLALCHEMY_ENGINE_OPTIONS = (
+        {"connect_args": {"check_same_thread": False}, "pool_pre_ping": True}
+        if _db_url.startswith("sqlite")
+        else {"pool_pre_ping": True, "pool_size": 10}
+    )
 
     # ── JWT ─────────────────────────────────────────────────────────────
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-dev-secret")
@@ -36,6 +39,10 @@ class Config:
 
     # ── External APIs ───────────────────────────────────────────────────
     GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY", "")
+
+    # ── Firebase ────────────────────────────────────────────────────────
+    FIREBASE_CREDENTIALS_PATH = os.getenv("FIREBASE_CREDENTIALS_PATH", "")
+    FIREBASE_STORAGE_BUCKET   = os.getenv("FIREBASE_STORAGE_BUCKET", "")
 
 
 class DevelopmentConfig(Config):

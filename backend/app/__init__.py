@@ -17,6 +17,9 @@ migrate = Migrate()
 jwt = JWTManager()
 ma = Marshmallow()
 
+# ── Firebase module (importable from anywhere as  from app import firebase) ──
+from app import firebase  # noqa: E402  (module-level import before create_app)
+
 
 def create_app(config_name: str | None = None) -> Flask:
     """Application factory."""
@@ -33,6 +36,9 @@ def create_app(config_name: str | None = None) -> Flask:
     ma.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
+    # ── Initialise Firebase (gracefully skipped if not configured) ──────
+    firebase.init_firebase(app)
+
     # ── Register blueprints ─────────────────────────────────────────────
     from app.api.auth      import auth_bp
     from app.api.bins      import bins_bp
@@ -41,6 +47,12 @@ def create_app(config_name: str | None = None) -> Flask:
     from app.api.rewards   import rewards_bp
     from app.api.dashboard import dashboard_bp
     from app.api.sensors   import sensors_bp
+    from app.api.users     import users_bp
+    from app.api.uploads   import uploads_bp
+    from app.api.vehicles  import vehicles_bp
+    from app.api.zones     import zones_bp
+    from app.api.drivers   import drivers_bp
+    from app.api.alerts    import alerts_bp
 
     app.register_blueprint(auth_bp,      url_prefix="/api/auth")
     app.register_blueprint(bins_bp,      url_prefix="/api/bins")
@@ -49,10 +61,20 @@ def create_app(config_name: str | None = None) -> Flask:
     app.register_blueprint(rewards_bp,   url_prefix="/api/rewards")
     app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
     app.register_blueprint(sensors_bp,   url_prefix="/api/sensors")
+    app.register_blueprint(users_bp,     url_prefix="/api/users")
+    app.register_blueprint(uploads_bp,   url_prefix="/api/uploads")
+    app.register_blueprint(vehicles_bp,  url_prefix="/api/vehicles")
+    app.register_blueprint(zones_bp,     url_prefix="/api/zones")
+    app.register_blueprint(drivers_bp,   url_prefix="/api/drivers")
+    app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
 
     # ── Root health‐check ───────────────────────────────────────────────
     @app.route("/")
     def health():
-        return {"status": "ok", "service": "Smart Waste Management API — Lusaka"}
+        return {
+            "status": "ok",
+            "service": "Smart Waste Management API — Lusaka",
+            "firebase": firebase.is_enabled(),
+        }
 
     return app

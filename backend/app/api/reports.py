@@ -3,12 +3,10 @@ Citizen Reports API — report illegal dumping, overflowing bins, etc.
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
-from geoalchemy2.shape import from_shape, to_shape
-from shapely.geometry import Point
 from datetime import datetime, timezone
 
-from app import db
-from app.models import Report, ReportImage, RewardTransaction, UserReward
+from app import db, firebase
+from app.models import Report, ReportImage, RewardTransaction, UserReward, User, UserNotification
 from app.schemas import ReportSchema, ReportCreateSchema
 
 reports_bp = Blueprint("reports", __name__)
@@ -21,10 +19,8 @@ REWARD_POINTS_PER_REPORT = 10
 
 def _enrich(report_obj: Report) -> dict:
     data = report_schema.dump(report_obj)
-    if report_obj.location:
-        pt = to_shape(report_obj.location)
-        data["latitude"] = pt.y
-        data["longitude"] = pt.x
+    data["latitude"]  = report_obj.latitude
+    data["longitude"] = report_obj.longitude
     return data
 
 
@@ -33,7 +29,7 @@ def _enrich(report_obj: Report) -> dict:
 def list_reports():
     """List reports — admins see all, residents see only their own."""
     claims = get_jwt()
-    query = Report.query
+    query  = Report.query
 
     if claims.get("role") == "resident":
         query = query.filter_by(reporter_id=get_jwt_identity())
@@ -60,25 +56,26 @@ def get_report(report_id):
 @reports_bp.route("", methods=["POST"])
 @jwt_required()
 def create_report():
-    """Submit a new citizen report with GPS location."""
+    """Submit a new citizen report."""
     user_id = get_jwt_identity()
-    data = report_create_schema.load(request.get_json())
+    data    = report_create_schema.load(request.get_json())
 
     report = Report(
         reporter_id=user_id,
         category=data["category"],
         description=data["description"],
-        location=from_shape(Point(data["longitude"], data["latitude"]), srid=4326),
+        latitude=data.get("latitude"),
+        longitude=data.get("longitude"),
         address=data.get("address"),
         zone_id=data.get("zone_id"),
     )
     db.session.add(report)
     db.session.flush()
 
-    # Award incentive points for a verified report
+    # Award incentive points
     reward = UserReward.query.filter_by(user_id=user_id).first()
     if reward:
-        reward.total_points += REWARD_POINTS_PER_REPORT
+        reward.total_points    += REWARD_POINTS_PER_REPORT
         reward.lifetime_points += REWARD_POINTS_PER_REPORT
         db.session.add(RewardTransaction(
             user_id=user_id,
@@ -100,22 +97,65 @@ def update_report_status(report_id):
     if claims.get("role") not in ("admin", "collector"):
         return jsonify({"error": "Insufficient permissions"}), 403
 
-    report = Report.query.get_or_404(report_id)
-    data = request.get_json()
-
+    report     = Report.query.get_or_404(report_id)
+    data       = request.get_json()
     new_status = data.get("status")
+
     if new_status:
         report.status = new_status
     if new_status == "resolved":
-        report.resolved_at = datetime.now(timezone.utc)
+        report.resolved_at     = datetime.now(timezone.utc)
         report.resolution_note = data.get("resolution_note", "")
-
-    # Optionally assign to a collector
     if data.get("assigned_to"):
         report.assigned_to = data["assigned_to"]
 
     db.session.commit()
+
+    # Notify the reporter about the status change
+    if new_status:
+        _notify_reporter(report, new_status)
+
     return jsonify(_enrich(report)), 200
+
+
+# ── Notification helper ────────────────────────────────────────────────────
+
+_STATUS_LABELS = {
+    "pending":     "Pending review",
+    "in_progress": "In progress",
+    "resolved":    "Resolved",
+    "rejected":    "Rejected",
+}
+
+def _notify_reporter(report: Report, new_status: str) -> None:
+    """Create an in-app notification and send an FCM push to the reporter."""
+    reporter = User.query.get(report.reporter_id)
+    if not reporter:
+        return
+
+    label = _STATUS_LABELS.get(new_status, new_status.replace("_", " ").title())
+    title = f"Report {label}"
+    body  = (
+        f"Your report '{report.category}' has been marked as {label.lower()}."
+    )
+
+    # Persist in-app notification
+    db.session.add(UserNotification(
+        user_id=reporter.id,
+        title=title,
+        body=body,
+        link=f"/reports/{report.id}",
+    ))
+    db.session.commit()
+
+    # Send FCM push if the device has registered a token
+    if reporter.fcm_token:
+        firebase.send_push(
+            token=reporter.fcm_token,
+            title=title,
+            body=body,
+            data={"report_id": report.id, "status": new_status},
+        )
 
 
 @reports_bp.route("/<string:report_id>/images", methods=["POST"])
@@ -123,7 +163,7 @@ def update_report_status(report_id):
 def add_report_image(report_id):
     """Attach an image URL to a report."""
     Report.query.get_or_404(report_id)
-    data = request.get_json()
+    data  = request.get_json()
     image = ReportImage(
         report_id=report_id,
         image_url=data["image_url"],
