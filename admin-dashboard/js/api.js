@@ -180,6 +180,7 @@ async function loadAllData() {
 
 // Per-page refresh — only reload the data relevant to the current page
 async function refreshPageData(page) {
+    if (!getToken()) return;   // not logged in — skip API calls silently
     try {
         switch (page) {
             case 'dashboard':

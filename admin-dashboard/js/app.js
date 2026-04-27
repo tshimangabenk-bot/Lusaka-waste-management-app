@@ -117,6 +117,7 @@ async function handleLogin() {
         renderDashboard();
         refreshIcons();
         showToast(`Welcome back, ${u.first_name}!`);
+        registerFcmToken();
 
     } catch (err) {
         errorEl.textContent = err.message || "Login failed.";
@@ -124,6 +125,42 @@ async function handleLogin() {
     } finally {
         btn.disabled = false;
         btn.textContent = "Sign In";
+    }
+}
+
+async function registerFcmToken() {
+    if (!('Notification' in window) || !getToken()) return;
+    if (Notification.permission === 'denied') return;
+    if (typeof firebase === 'undefined' || !firebase.apps?.length) return;
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') return;
+
+        let swReg;
+        if ('serviceWorker' in navigator) {
+            swReg = await navigator.serviceWorker.register('/admin-dashboard/firebase-messaging-sw.js');
+        }
+
+        const messaging = firebase.messaging();
+        const fcmToken = await messaging.getToken({
+            vapidKey: window.FIREBASE_VAPID_KEY || '',
+            serviceWorkerRegistration: swReg,
+        });
+
+        if (fcmToken) {
+            await apiFetch('/users/me/fcm-token', {
+                method: 'PUT',
+                body: JSON.stringify({ fcm_token: fcmToken }),
+            });
+        }
+
+        messaging.onMessage(payload => {
+            const title = payload.notification?.title || 'SmartWaste Alert';
+            const body  = payload.notification?.body  || '';
+            showToast(`${title}: ${body}`, 'error');
+        });
+    } catch {
+        // FCM not configured or permission denied — degrade silently
     }
 }
 
@@ -575,6 +612,7 @@ $("#exportUsersBtn").addEventListener("click", exportUsers);
 // ══════════════════════════════════════════════════════════════════════════════
 
 async function renderPage(page) {
+    if (!getToken()) return;
     await refreshPageData(page);
     switch (page) {
         case "dashboard": renderDashboard(); break;
@@ -1649,6 +1687,7 @@ function resetAutoRefresh() {
     if (autoRefreshTimer) clearInterval(autoRefreshTimer);
     const interval = parseInt($("#settingsRefreshInterval").value) || 30;
     autoRefreshTimer = setInterval(() => {
+        if (!getToken()) return;
         renderPage(currentPage);
         refreshIcons();
         const lastSync = $("#lastSyncTime");
@@ -1668,6 +1707,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (getToken()) {
         await loadAllData();
+        registerFcmToken();
     }
 
     renderDashboard();

@@ -2,7 +2,7 @@
 Application factory — creates and configures the Flask app.
 """
 import os
-from flask import Flask
+from flask import Flask, request, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -34,7 +34,23 @@ def create_app(config_name: str | None = None) -> Flask:
     migrate.init_app(app, db)
     jwt.init_app(app)
     ma.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": "*"}},
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        max_age=600,
+    )
+
+    @app.before_request
+    def handle_options():
+        if request.method == "OPTIONS":
+            res = make_response()
+            res.headers["Access-Control-Allow-Origin"]  = "*"
+            res.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            res.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            res.headers["Access-Control-Max-Age"]       = "600"
+            return res
 
     # ── Initialise Firebase (gracefully skipped if not configured) ──────
     firebase.init_firebase(app)
