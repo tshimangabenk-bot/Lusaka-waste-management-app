@@ -1,0 +1,338 @@
+{
+  "_comment": "Smart Waste Management System — Firebase Realtime Database Schema (Lusaka City Council)",
+  "_note": "Keys prefixed with $ are variable (push IDs or UIDs). Timestamps = epoch milliseconds. GPS = separate lat/lng fields (PostGIS not supported in Firebase).",
+
+  "users": {
+    "$uid": {
+      "email":         "resident@example.com",
+      "phone":         "+260977000001",
+      "first_name":    "Isaac",
+      "last_name":     "Mayamba",
+      "role":          "resident",
+      "profile_image": "https://firebasestorage.googleapis.com/...",
+      "compound":      "Mtendere",
+      "latitude":      -15.4167,
+      "longitude":     28.2833,
+      "fcm_token":     "eXaMpLeFcMtOkEn...",
+      "is_active":     true,
+      "is_verified":   false,
+      "created_at":    1714000000000,
+      "updated_at":    1714000000000
+    }
+  },
+
+  "refresh_tokens": {
+    "$uid": {
+      "$token_id": {
+        "token_hash":   "hashed_token_string",
+        "device_info":  "Chrome on Windows",
+        "expires_at":   1716592000000,
+        "revoked":      false,
+        "created_at":   1714000000000
+      }
+    }
+  },
+
+  "zones": {
+    "zone_mtendere": {
+      "name":           "Mtendere",
+      "population_est": 85000,
+      "description":    "High-density residential compound in eastern Lusaka",
+      "created_at":     1714000000000
+    },
+    "zone_george": {
+      "name":           "George Compound",
+      "population_est": 120000,
+      "description":    "One of the largest informal settlements in Lusaka",
+      "created_at":     1714000000000
+    },
+    "zone_kalingalinga": {
+      "name":           "Kalingalinga",
+      "population_est": 60000,
+      "description":    "Medium-density compound near the University of Zambia",
+      "created_at":     1714000000000
+    },
+    "zone_kanyama": {
+      "name":           "Kanyama",
+      "population_est": 150000,
+      "description":    "Highest-density compound on the western corridor",
+      "created_at":     1714000000000
+    },
+    "zone_chawama": {
+      "name":           "Chawama",
+      "population_est": 90000,
+      "description":    "Southern Lusaka compound with significant waste challenges",
+      "created_at":     1714000000000
+    },
+    "zone_mandevu": {
+      "name":           "Mandevu",
+      "population_est": 70000,
+      "description":    "Eastern residential area with growing population",
+      "created_at":     1714000000000
+    },
+    "zone_garden": {
+      "name":           "Garden Compound",
+      "population_est": 45000,
+      "description":    "Central Lusaka residential zone",
+      "created_at":     1714000000000
+    },
+    "zone_chipata": {
+      "name":           "Chipata Compound",
+      "population_est": 55000,
+      "description":    "High-density area adjacent to Great East Road",
+      "created_at":     1714000000000
+    }
+  },
+
+  "smart_bins": {
+    "$bin_id": {
+      "label":            "BIN-MT-001",
+      "zone_id":          "zone_mtendere",
+      "latitude":         -15.4167,
+      "longitude":        28.2833,
+      "address":          "Corner of Mtendere Road & Bauleni Street",
+      "capacity_liters":  240,
+      "bin_type":         "general",
+      "status":           "medium",
+      "fill_percentage":  55.5,
+      "last_emptied_at":  1714000000000,
+      "installed_at":     1714000000000,
+      "created_at":       1714000000000,
+      "updated_at":       1714000000000
+    }
+  },
+
+  "sensors": {
+    "$sensor_id": {
+      "bin_id":        "$bin_id",
+      "sensor_type":   "ultrasonic",
+      "hardware_id":   "AA:BB:CC:DD:EE:01",
+      "firmware_ver":  "v2.1.3",
+      "battery_level": 87.5,
+      "status":        "online",
+      "last_ping_at":  1714000000000,
+      "installed_at":  1714000000000,
+      "created_at":    1714000000000
+    }
+  },
+
+  "sensor_readings": {
+    "$bin_id": {
+      "$push_id": {
+        "sensor_id":      "$sensor_id",
+        "fill_percentage": 62.3,
+        "distance_cm":    91.0,
+        "temperature_c":  28.5,
+        "weight_kg":      48.2,
+        "battery_level":  87.5,
+        "recorded_at":    1714000000000
+      }
+    }
+  },
+
+  "reports": {
+    "$report_id": {
+      "reporter_id":      "$uid",
+      "category":         "illegal_dumping",
+      "description":      "Large pile of rubbish dumped near the school gate",
+      "latitude":         -15.4200,
+      "longitude":        28.2900,
+      "address":          "Near Mtendere Primary School",
+      "zone_id":          "zone_mtendere",
+      "status":           "pending",
+      "assigned_to":      null,
+      "resolved_at":      null,
+      "resolution_note":  null,
+      "created_at":       1714000000000,
+      "updated_at":       1714000000000,
+      "images": {
+        "$push_id": {
+          "image_url":    "https://firebasestorage.googleapis.com/...",
+          "caption":      "Photo taken at 08:30",
+          "uploaded_at":  1714000000000
+        }
+      }
+    }
+  },
+
+  "vehicles": {
+    "$vehicle_id": {
+      "registration_no":  "ALU 1234",
+      "vehicle_type":     "compactor",
+      "capacity_tons":    5.0,
+      "status":           "available",
+      "current_latitude": -15.4100,
+      "current_longitude":28.2700,
+      "assigned_driver":  "$uid",
+      "created_at":       1714000000000,
+      "updated_at":       1714000000000
+    }
+  },
+
+  "collection_routes": {
+    "$route_id": {
+      "name":              "Mtendere Morning Run",
+      "zone_id":           "zone_mtendere",
+      "vehicle_id":        "$vehicle_id",
+      "driver_id":         "$uid",
+      "status":            "planned",
+      "scheduled_date":    "2026-05-13",
+      "start_time":        null,
+      "end_time":          null,
+      "total_distance_km": 12.4,
+      "notes":             "Priority bins on main road first",
+      "created_at":        1714000000000,
+      "updated_at":        1714000000000,
+      "stops": {
+        "1": {
+          "bin_id":        "$bin_id",
+          "stop_order":    1,
+          "visited":       false,
+          "visited_at":    null,
+          "fill_at_visit": null
+        },
+        "2": {
+          "bin_id":        "$bin_id_2",
+          "stop_order":    2,
+          "visited":       false,
+          "visited_at":    null,
+          "fill_at_visit": null
+        }
+      }
+    }
+  },
+
+  "reward_catalog": {
+    "reward_airtime": {
+      "title":       "Mobile Airtime ZMW 10",
+      "description": "Redeemable for ZMW 10 airtime on any network",
+      "points_cost": 100,
+      "stock":       500,
+      "image_url":   null,
+      "is_active":   true,
+      "created_at":  1714000000000
+    },
+    "reward_voucher": {
+      "title":       "Shopping Voucher ZMW 25",
+      "description": "Valid at partner supermarkets across Lusaka",
+      "points_cost": 250,
+      "stock":       200,
+      "image_url":   null,
+      "is_active":   true,
+      "created_at":  1714000000000
+    },
+    "reward_seedling": {
+      "title":       "Tree Seedling",
+      "description": "Collect a free tree seedling from LCC nursery",
+      "points_cost": 50,
+      "stock":       1000,
+      "image_url":   null,
+      "is_active":   true,
+      "created_at":  1714000000000
+    },
+    "reward_badge": {
+      "title":       "Community Champion Badge",
+      "description": "Digital badge displayed on your profile",
+      "points_cost": 25,
+      "stock":       null,
+      "image_url":   null,
+      "is_active":   true,
+      "created_at":  1714000000000
+    },
+    "reward_bin": {
+      "title":       "Waste Bin (Home)",
+      "description": "Free 120L household waste bin from LCC",
+      "points_cost": 500,
+      "stock":       100,
+      "image_url":   null,
+      "is_active":   true,
+      "created_at":  1714000000000
+    }
+  },
+
+  "user_rewards": {
+    "$uid": {
+      "total_points":    350,
+      "lifetime_points": 820,
+      "updated_at":      1714000000000
+    }
+  },
+
+  "reward_transactions": {
+    "$uid": {
+      "$push_id": {
+        "action":       "report_verified",
+        "points":       50,
+        "reference_id": "$report_id",
+        "description":  "Points earned for verified illegal dumping report",
+        "created_at":   1714000000000
+      }
+    }
+  },
+
+  "alerts": {
+    "$push_id": {
+      "bin_id":      "$bin_id",
+      "alert_type":  "bin_full",
+      "severity":    "warning",
+      "message":     "BIN-MT-001 is 95% full — schedule collection",
+      "is_read":     false,
+      "resolved":    false,
+      "resolved_at": null,
+      "created_at":  1714000000000
+    }
+  },
+
+  "user_notifications": {
+    "$uid": {
+      "$push_id": {
+        "title":      "Report Update",
+        "body":       "Your illegal dumping report has been acknowledged by LCC.",
+        "is_read":    false,
+        "link":       "/reports/$report_id",
+        "created_at": 1714000000000
+      }
+    }
+  },
+
+  "waste_generation_logs": {
+    "$zone_id": {
+      "2026-05-12": {
+        "total_volume_l":   4500.0,
+        "total_weight_kg":  3200.5,
+        "bins_emptied":     18,
+        "avg_fill_pct":     72.3,
+        "weather_temp_c":   27.0,
+        "weather_rain_mm":  0.0
+      }
+    }
+  },
+
+  "ml_models": {
+    "$model_id": {
+      "model_name":  "Waste Volume Predictor",
+      "version":     "2.1.0",
+      "description": "Predicts daily waste volume per zone using 90-day history",
+      "accuracy":    0.921,
+      "model_path":  "models/waste_volume_v2.1.0.pkl",
+      "trained_at":  1714000000000,
+      "is_active":   true,
+      "created_at":  1714000000000
+    }
+  },
+
+  "audit_log": {
+    "$push_id": {
+      "user_id":     "$uid",
+      "action":      "report.resolved",
+      "entity_type": "reports",
+      "entity_id":   "$report_id",
+      "details": {
+        "previous_status": "in_progress",
+        "new_status":      "resolved"
+      },
+      "ip_address":  "192.168.1.10",
+      "created_at":  1714000000000
+    }
+  }
+}

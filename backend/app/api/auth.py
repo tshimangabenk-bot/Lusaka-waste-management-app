@@ -10,6 +10,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_jwt,
 )
+from marshmallow import ValidationError
 
 from app import db
 from app.models import User, UserReward
@@ -25,7 +26,10 @@ login_schema = LoginSchema()
 @auth_bp.route("/register", methods=["POST"])
 def register():
     """Register a new user (resident, collector, or admin)."""
-    data = user_create_schema.load(request.get_json())
+    try:
+        data = user_create_schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({"error": "Validation failed", "details": err.messages}), 422
 
     if User.query.filter_by(email=data["email"]).first():
         return jsonify({"error": "Email already registered"}), 409
@@ -68,7 +72,10 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     """Authenticate and return JWT tokens."""
-    data = login_schema.load(request.get_json())
+    try:
+        data = login_schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({"error": "Validation failed", "details": err.messages}), 422
     user = User.query.filter_by(email=data["email"]).first()
 
     if not user or not check_password_hash(user.password_hash, data["password"]):

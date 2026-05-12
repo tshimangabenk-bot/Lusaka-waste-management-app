@@ -1,11 +1,15 @@
 """
 Firebase Admin SDK — single initialisation point.
 
-Features enabled when FIREBASE_CREDENTIALS_PATH is set:
+Features enabled when credentials are available (either file or env var):
   - Auth   : verify Firebase ID tokens (Google Sign-In, phone auth, etc.)
   - Storage: upload report images to Firebase Storage
   - FCM    : send push notifications to resident devices
+
+On Railway/Render set FIREBASE_CREDENTIALS_JSON to the full contents of
+firebase-credentials.json (paste the entire JSON as one env var value).
 """
+import json
 import logging
 import os
 
@@ -21,22 +25,34 @@ def init_firebase(app) -> None:
     if _initialized:
         return
 
-    cred_path = app.config.get("FIREBASE_CREDENTIALS_PATH", "")
-    if not cred_path or not os.path.exists(cred_path):
-        app.logger.warning(
-            "Firebase disabled — set FIREBASE_CREDENTIALS_PATH to a valid "
-            "service-account JSON file to enable Auth, Storage, and FCM."
-        )
-        return
-
     import firebase_admin
     from firebase_admin import credentials
 
     bucket = app.config.get("FIREBASE_STORAGE_BUCKET", "")
-    firebase_admin.initialize_app(
-        credentials.Certificate(cred_path),
-        {"storageBucket": bucket},
-    )
+    cred = None
+
+    # Option 1: inline JSON via environment variable (Railway / Render)
+    cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON", "")
+    if cred_json:
+        try:
+            cred = credentials.Certificate(json.loads(cred_json))
+        except Exception as e:
+            app.logger.warning("FIREBASE_CREDENTIALS_JSON is invalid: %s", e)
+
+    # Option 2: path to local JSON file (local dev)
+    if cred is None:
+        cred_path = app.config.get("FIREBASE_CREDENTIALS_PATH", "")
+        if cred_path and os.path.exists(cred_path):
+            cred = credentials.Certificate(cred_path)
+
+    if cred is None:
+        app.logger.warning(
+            "Firebase disabled — set FIREBASE_CREDENTIALS_JSON (production) "
+            "or FIREBASE_CREDENTIALS_PATH (local dev) to enable Auth, Storage, and FCM."
+        )
+        return
+
+    firebase_admin.initialize_app(cred, {"storageBucket": bucket})
     _initialized = True
     app.logger.info("Firebase Admin SDK initialised (bucket=%s).", bucket)
 

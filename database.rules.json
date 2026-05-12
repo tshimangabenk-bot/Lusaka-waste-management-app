@@ -1,0 +1,103 @@
+{
+  "rules": {
+
+    "users": {
+      "$uid": {
+        ".read":  "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      }
+    },
+
+    "refresh_tokens": {
+      "$uid": {
+        ".read":  "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+
+    "zones": {
+      ".read":  "auth !== null",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "smart_bins": {
+      ".read":  "auth !== null",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'collector'"
+    },
+
+    "sensors": {
+      ".read":  "auth !== null",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "sensor_readings": {
+      ".read":  "auth !== null",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'collector'"
+    },
+
+    "reports": {
+      ".read":  "auth !== null",
+      "$report_id": {
+        ".write": "auth !== null",
+        ".validate": "newData.hasChildren(['reporter_id','category','description','latitude','longitude','status','created_at'])"
+      }
+    },
+
+    "vehicles": {
+      ".read":  "auth !== null",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "collection_routes": {
+      ".read":  "auth !== null",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'supervisor'"
+    },
+
+    "reward_catalog": {
+      ".read":  "auth !== null",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "user_rewards": {
+      "$uid": {
+        ".read":  "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      }
+    },
+
+    "reward_transactions": {
+      "$uid": {
+        ".read":  "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      }
+    },
+
+    "alerts": {
+      ".read":  "root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'supervisor'",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "user_notifications": {
+      "$uid": {
+        ".read":  "$uid === auth.uid",
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin' || $uid === auth.uid"
+      }
+    },
+
+    "waste_generation_logs": {
+      ".read":  "root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'supervisor'",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "ml_models": {
+      ".read":  "root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "root.child('users').child(auth.uid).child('role').val() === 'admin'"
+    },
+
+    "audit_log": {
+      ".read":  "root.child('users').child(auth.uid).child('role').val() === 'admin'",
+      ".write": "auth !== null"
+    }
+
+  }
+}

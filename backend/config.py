@@ -14,6 +14,9 @@ class Config:
 
     # ── Database ────────────────────────────────────────────────────────
     _db_url = os.getenv("DATABASE_URL", "sqlite:///smart_waste.db")
+    # Railway (and Heroku) issue postgres:// URLs; SQLAlchemy requires postgresql://
+    if _db_url.startswith("postgres://"):
+        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SQLite needs check_same_thread=False for Flask's threaded request handling
