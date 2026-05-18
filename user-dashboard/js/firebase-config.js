@@ -10,7 +10,7 @@ const FIREBASE_CONFIG = {
 };
 
 // VAPID key — Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
-window.FIREBASE_VAPID_KEY = "REPLACE_WITH_YOUR_VAPID_KEY";
+window.FIREBASE_VAPID_KEY = "BBE9lavu65K5W2_UvA6eFPP5veVa_V6uK04iXSWGt21GJbVx0jSmgFkptk8iwTfku7RO2XhaLVJGHsj4-Xtyyz8";
 
 try {
     if (typeof firebase !== "undefined" && !firebase.apps.length) {
