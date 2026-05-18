@@ -1,21 +1,13 @@
-/**
- * Firebase Cloud Messaging service worker — Admin Dashboard.
- * Handles background push notifications when the browser tab is not in focus.
- *
- * This file MUST live at the root of admin-dashboard/ (same level as index.html).
- * Fill in the same config values as js/firebase-config.js.
- */
-
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
 
 firebase.initializeApp({
-    apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+    apiKey:            "AIzaSyB2a2Ujs89NelznCuZvS5I9XhCWCk3J6r8",
     authDomain:        "smart-waste-management-s-6225c.firebaseapp.com",
     projectId:         "smart-waste-management-s-6225c",
-    storageBucket:     "smart-waste-management-s-6225c.appspot.com",
-    messagingSenderId: "REPLACE_WITH_YOUR_SENDER_ID",
-    appId:             "REPLACE_WITH_YOUR_APP_ID",
+    storageBucket:     "smart-waste-management-s-6225c.firebasestorage.app",
+    messagingSenderId: "202624977732",
+    appId:             "1:202624977732:web:82f47e768715464d332511",
 });
 
 const messaging = firebase.messaging();
