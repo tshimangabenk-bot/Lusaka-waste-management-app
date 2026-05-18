@@ -497,19 +497,24 @@ img { max-width: 100%; display: block; }
 /* ── Page Hero ────────────────────────────────────────────────────────────── */
 .page-hero {
     display: flex; align-items: center; justify-content: space-between;
-    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16,185,129,0.06) 100%);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
-    padding: 36px 40px;
+    padding: 48px 40px;
     margin-bottom: 28px; gap: 20px;
     overflow: hidden; position: relative;
+    min-height: 200px;
+    background:
+        linear-gradient(135deg,
+            rgba(10,14,23,0.92) 0%,
+            rgba(10,14,23,0.75) 40%,
+            rgba(16,185,129,0.18) 70%,
+            rgba(10,14,23,0.85) 100%),
+        url('../images/hero.jpeg') center 40% / cover no-repeat;
 }
 .page-hero::before {
     content: '';
-    position: absolute; top: -80px; right: -80px;
-    width: 300px; height: 300px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 65%);
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(16,185,129,0.12) 0%, transparent 65%);
     pointer-events: none;
 }
 
@@ -518,27 +523,6 @@ img { max-width: 100%; display: block; }
 .hero-name { font-size: 2.2rem; color: var(--text-primary); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 8px; }
 .hero-sub { font-size: 0.82rem; color: var(--text-muted); }
 
-.hero-image {
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-    width: 260px;
-    height: 160px;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.08);
-}
-.hero-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center 40%;
-    display: block;
-    filter: brightness(0.88) saturate(1.1);
-    transition: transform 0.4s ease;
-}
-.hero-image:hover img { transform: scale(1.04); }
 
 .hero-badge { text-align: center; flex-shrink: 0; position: relative; z-index: 1; }
 .hero-badge-inner {
@@ -976,7 +960,6 @@ img { max-width: 100%; display: block; }
     .stats-strip { grid-template-columns: 1fr 1fr; gap: 10px; }
     .page-hero { padding: 24px 22px; }
     .hero-name { font-size: 1.8rem; }
-    .hero-image { display: none; }
     .hero-badge { display: none; }
     .form-row { grid-template-columns: 1fr; }
     .page-header { flex-direction: column; align-items: flex-start; }
