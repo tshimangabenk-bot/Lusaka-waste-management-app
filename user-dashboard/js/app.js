@@ -201,7 +201,8 @@ function renderSidebar() {
     document.getElementById('sidebar-avatar').textContent      = initials;
     document.getElementById('sidebar-user-name').textContent   = `${u.first_name} ${u.last_name}`;
     document.getElementById('sidebar-user-compound').textContent = u.compound || 'Lusaka';
-    document.getElementById('points-value').textContent        = dashData.rewards.total_points.toLocaleString();
+    const ptsEl = document.getElementById('points-value');
+    if (ptsEl) ptsEl.textContent = dashData.rewards.total_points.toLocaleString();
 
     if (u.is_verified) {
         document.getElementById('verified-dot').style.display = 'flex';
@@ -214,7 +215,7 @@ function renderSidebar() {
 
     const pendingCount = dashData.report_stats.pending;
     const rBadge = document.getElementById('badge-reports');
-    if (pendingCount > 0) { rBadge.textContent = pendingCount; rBadge.style.display = 'inline-flex'; }
+    if (rBadge && pendingCount > 0) { rBadge.textContent = pendingCount; rBadge.style.display = 'inline-flex'; }
 
     lucide.createIcons();
 }
@@ -410,7 +411,8 @@ async function handleRedeem(itemId) {
         const res = await apiRedeem(itemId);
         showToast(`Redeemed! ${res.remaining_points} pts remaining.`, 'success');
         if (dashData) dashData.rewards.total_points = res.remaining_points;
-        document.getElementById('sidebar-points').querySelector('#points-value').textContent = res.remaining_points.toLocaleString();
+        const pv = document.getElementById('points-value');
+        if (pv) pv.textContent = res.remaining_points.toLocaleString();
         loadRewards();
     } catch (err) {
         showToast(err.message, 'error');
