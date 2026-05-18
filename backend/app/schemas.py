@@ -7,6 +7,7 @@ from app.models import (
     Report, ReportImage, Vehicle, CollectionRoute, RouteStop,
     RewardCatalog, UserReward, RewardTransaction,
     Alert, UserNotification, WasteGenerationLog,
+    PickupSchedule, PickupRequest, DriverLocation,
 )
 
 
@@ -162,3 +163,26 @@ class WasteGenerationLogSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = WasteGenerationLog
         load_instance = True
+
+
+# ── Pickup Schedules & Requests ────────────────────────────────────────
+class PickupScheduleSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = PickupSchedule
+        load_instance = True
+
+
+class PickupRequestSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = PickupRequest
+        load_instance = True
+        exclude = ("user",)
+
+
+# ── Driver Locations ───────────────────────────────────────────────────
+class DriverLocationSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = DriverLocation
+        load_instance = True
+
+    driver = ma.Nested(UserSchema, dump_only=True, only=("id", "first_name", "last_name", "role"))

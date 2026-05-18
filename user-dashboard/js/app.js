@@ -48,6 +48,8 @@ function navigateTo(page) {
         rewards:       'Rewards',
         bins:          'Nearby Bins',
         notifications: 'Notifications',
+        schedule:      'Pickup Schedule',
+        tracking:      'Live Truck Tracking',
     };
     document.getElementById('topbar-title').textContent = titles[page] || page;
 
@@ -61,6 +63,8 @@ function navigateTo(page) {
     if (page === 'rewards')       loadRewards();
     if (page === 'bins')          initBinsPage();
     if (page === 'notifications') loadNotifications();
+    if (page === 'schedule')      loadSchedulePage();
+    if (page === 'tracking')      loadTrackingPage();
 
     lucide.createIcons();
 }
@@ -670,3 +674,628 @@ function showToast(msg, type = 'success') {
 document.getElementById('logout-btn').addEventListener('click', () => {
     if (confirm('Sign out of SmartWaste?')) apiLogout();
 });
+
+
+/* ============================================================================
+   PICKUP SCHEDULE PAGE
+   ============================================================================ */
+
+const schedState = {
+    schedule:   null,   // { zone_id, zone_name, schedules[], upcoming[] }
+    requests:   [],     // user's custom pickup requests
+    weekOffset: 0,      // 0 = current week, -1 = last week, +1 = next week
+};
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+async function loadSchedulePage() {
+    try {
+        [schedState.schedule, schedState.requests] = await Promise.all([
+            apiGetZoneSchedule(),
+            apiGetMyRequests(),
+        ]);
+    } catch {
+        // Demo data when backend is offline
+        schedState.schedule = getDemoSchedule();
+        schedState.requests  = getDemoRequests();
+    }
+    schedState.weekOffset = 0;
+    renderScheduleZoneCard();
+    renderWeekCalendar();
+    renderUpcomingList();
+    renderMyRequestsList();
+}
+
+// ── Zone banner ───────────────────────────────────────────────────────────────
+function renderScheduleZoneCard() {
+    const s = schedState.schedule;
+    if (!s) return;
+
+    document.getElementById('sched-zone-name').textContent = s.zone_name || '—';
+
+    const dayNames = s.schedules.map(sc => sc.day_name);
+    document.getElementById('sched-zone-days').textContent =
+        dayNames.length
+            ? `Collects every: ${dayNames.join(', ')}`
+            : 'No regular collection schedule set for your zone.';
+
+    const next = (s.upcoming || []).find(u => u.days_away >= 0);
+    const nextEl = document.getElementById('sched-next-text');
+    if (next) {
+        nextEl.textContent = next.days_away === 0
+            ? `Today — ${next.time_label}`
+            : next.days_away === 1
+                ? `Tomorrow — ${next.time_label}`
+                : `${next.day_name} (in ${next.days_away}d) — ${next.time_label}`;
+    } else {
+        nextEl.textContent = 'No upcoming collection';
+    }
+}
+
+// ── Weekly calendar ───────────────────────────────────────────────────────────
+function renderWeekCalendar() {
+    const s    = schedState.schedule || {};
+    const reqs = schedState.requests || [];
+
+    // Build sets for fast lookup
+    const collectionDays = new Set((s.schedules || []).map(sc => sc.day_of_week));
+    const reqDates = new Set(
+        reqs.filter(r => r.status !== 'cancelled').map(r => r.requested_date)
+    );
+
+    // Compute the Monday of current week + offset
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayOfWeek = today.getDay(); // 0=Sun
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + schedState.weekOffset * 7);
+
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    // Update week label
+    const fmt = d => d.toLocaleDateString('en-ZM', { day: 'numeric', month: 'short' });
+    document.getElementById('cal-week-label').textContent = `${fmt(monday)} – ${fmt(sunday)}`;
+
+    const DAY_ABBR = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const TIME_SHORT = { morning: 'AM', afternoon: 'PM', evening: 'Eve' };
+    const s_map = {};
+    (s.schedules || []).forEach(sc => { s_map[sc.day_of_week] = sc; });
+
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+        const d   = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        const dow = i;          // 0=Mon in our grid
+        const iso = d.toISOString().split('T')[0];
+
+        const isToday = d.getTime() === today.getTime();
+        const isPast  = d < today;
+        const hasColl = collectionDays.has(dow);
+        const hasReq  = reqDates.has(iso);
+        const isFuture = !isPast && !isToday;
+
+        let classes = 'week-day-cell';
+        if (isPast)  classes += ' cal-past';
+        if (isToday) classes += ' cal-today';
+        if (hasColl) classes += ' cal-collection';
+        if (hasReq)  classes += ' cal-has-request';
+        if (isFuture) classes += ' clickable';
+
+        const sc = s_map[dow];
+        const icons = hasColl
+            ? `<div class="wdc-truck">🚛</div><div class="wdc-slot">${sc ? TIME_SHORT[sc.time_slot] || sc.time_slot : ''}</div>`
+            : '';
+        const reqIcon = hasReq ? `<div class="wdc-req">⭐</div><div class="wdc-req-label">Requested</div>` : '';
+
+        html += `
+            <div class="${classes}" ${isFuture ? `onclick="openPickupModalForDate('${iso}')"` : ''}>
+                <div class="wdc-name">${DAY_ABBR[i]}</div>
+                <div class="wdc-date">${d.getDate()}</div>
+                <div class="wdc-icons">${icons}${reqIcon}</div>
+            </div>`;
+    }
+    document.getElementById('week-grid').innerHTML = html;
+}
+
+function openPickupModalForDate(iso) {
+    document.getElementById('pickup-date').value = iso;
+    openPickupModal();
+}
+
+// ── Upcoming collections list ─────────────────────────────────────────────────
+function renderUpcomingList() {
+    const upcoming = (schedState.schedule || {}).upcoming || [];
+    const el = document.getElementById('upcoming-list');
+    if (!upcoming.length) {
+        el.innerHTML = '<div class="empty-state"><i class="lucide-calendar-x"></i><p>No collections scheduled in the next 14 days.</p></div>';
+        lucide.createIcons();
+        return;
+    }
+    el.innerHTML = upcoming.slice(0, 7).map(u => {
+        const isSoon = u.days_away <= 1;
+        let label = u.days_away === 0 ? 'Today'
+                  : u.days_away === 1 ? 'Tomorrow'
+                  : `In ${u.days_away} days`;
+        return `
+            <div class="upcoming-item">
+                <div class="upcoming-icon ${isSoon ? 'soon' : ''}">🚛</div>
+                <div class="upcoming-body">
+                    <div class="upcoming-date">${u.day_name}, ${formatDate(u.date)}</div>
+                    <div class="upcoming-meta">${u.time_label || u.time_slot} · ${u.frequency}</div>
+                </div>
+                <span class="upcoming-badge ${isSoon ? 'soon' : ''}">${label}</span>
+            </div>`;
+    }).join('');
+    lucide.createIcons();
+}
+
+// ── My requests list ──────────────────────────────────────────────────────────
+function renderMyRequestsList() {
+    const reqs = schedState.requests || [];
+    const badge = document.getElementById('sched-requests-badge');
+    badge.textContent = reqs.length ? `${reqs.length} total` : '';
+
+    const el = document.getElementById('my-requests-list');
+    if (!reqs.length) {
+        el.innerHTML = '<div class="empty-state"><i class="lucide-calendar-plus"></i><p>No custom requests yet.<br>Click "Request pickup" to add one.</p></div>';
+        lucide.createIcons();
+        return;
+    }
+
+    el.innerHTML = reqs.map(r => {
+        const canCancel = ['pending', 'confirmed'].includes(r.status);
+        return `
+            <div class="pickup-req-item">
+                <div class="pickup-req-dot ${r.status}"></div>
+                <div class="pickup-req-body">
+                    <div class="pickup-req-date">${formatDate(r.requested_date)} · ${r.time_label || r.time_preference}</div>
+                    <div class="pickup-req-meta">${escHtml(r.description || '—')}${r.notes ? ` · Note: ${escHtml(r.notes)}` : ''}</div>
+                </div>
+                <span class="pickup-req-status ${r.status}">${r.status}</span>
+                ${canCancel ? `<button class="cancel-req-btn" onclick="handleCancelRequest('${r.id}')">Cancel</button>` : ''}
+            </div>`;
+    }).join('');
+    lucide.createIcons();
+}
+
+// ── Cancel request ────────────────────────────────────────────────────────────
+async function handleCancelRequest(reqId) {
+    if (!confirm('Cancel this pickup request?')) return;
+    try {
+        await apiCancelPickupRequest(reqId);
+        schedState.requests = await apiGetMyRequests().catch(() => schedState.requests);
+        const r = schedState.requests.find(x => x.id === reqId);
+        if (r) r.status = 'cancelled';
+        renderMyRequestsList();
+        renderWeekCalendar();
+        showToast('Request cancelled.', 'success');
+    } catch (err) {
+        showToast(err.message || 'Failed to cancel.', 'error');
+    }
+}
+
+// ── Pickup request modal ──────────────────────────────────────────────────────
+function openPickupModal() {
+    const modal = document.getElementById('pickup-modal');
+    // Default date to tomorrow if not already set
+    const dateEl = document.getElementById('pickup-date');
+    if (!dateEl.value) {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateEl.value = tomorrow.toISOString().split('T')[0];
+    }
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    dateEl.min = today;
+
+    modal.classList.add('open');
+    modal.removeAttribute('aria-hidden');
+}
+
+function closePickupModal() {
+    const modal = document.getElementById('pickup-modal');
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.getElementById('pickup-date').value = '';
+    document.getElementById('pickup-description').value = '';
+}
+
+document.getElementById('request-pickup-btn').addEventListener('click', openPickupModal);
+document.getElementById('close-pickup-modal').addEventListener('click', closePickupModal);
+document.getElementById('cancel-pickup-modal').addEventListener('click', closePickupModal);
+document.getElementById('pickup-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('pickup-modal')) closePickupModal();
+});
+
+document.getElementById('submit-pickup-form').addEventListener('click', async () => {
+    const date        = document.getElementById('pickup-date').value;
+    const time        = document.getElementById('pickup-time').value;
+    const description = document.getElementById('pickup-description').value.trim();
+    const btn         = document.getElementById('submit-pickup-form');
+
+    if (!date) { showToast('Please select a date.', 'error'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    try {
+        const req = await apiCreatePickupRequest({
+            requested_date:  date,
+            time_preference: time,
+            description,
+        }).catch(() => {
+            // Demo fallback — simulate created request
+            return {
+                id:              `demo-${Date.now()}`,
+                requested_date:  date,
+                time_preference: time,
+                time_label:      { morning: '7 am – 12 pm', afternoon: '12 pm – 5 pm', evening: '5 pm – 8 pm' }[time],
+                description,
+                status:          'pending',
+                notes:           null,
+                created_at:      new Date().toISOString(),
+            };
+        });
+        schedState.requests = [req, ...schedState.requests];
+        renderMyRequestsList();
+        renderWeekCalendar();
+        closePickupModal();
+        showToast('Pickup request submitted! You\'ll be notified when confirmed.', 'success');
+    } catch (err) {
+        showToast(err.message || 'Failed to submit.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="lucide-send"></i> Submit request';
+        lucide.createIcons();
+    }
+});
+
+// ── Calendar navigation ───────────────────────────────────────────────────────
+document.getElementById('cal-prev-week').addEventListener('click', () => {
+    schedState.weekOffset--;
+    renderWeekCalendar();
+});
+document.getElementById('cal-next-week').addEventListener('click', () => {
+    schedState.weekOffset++;
+    renderWeekCalendar();
+});
+
+// ── Demo data ─────────────────────────────────────────────────────────────────
+function getDemoSchedule() {
+    const TIME_LABELS = { morning: '7 am – 12 pm', afternoon: '12 pm – 5 pm', evening: '5 pm – 8 pm' };
+    const today  = new Date(); today.setHours(0,0,0,0);
+    const upcoming = [];
+    for (let offset = 0; offset < 15; offset++) {
+        const d   = new Date(today); d.setDate(today.getDate() + offset);
+        const dow = d.getDay() === 0 ? 6 : d.getDay() - 1;   // JS Sun=0 → Mon=0
+        const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        // Mon=0, Wed=2, Fri=4
+        if ([0, 2, 4].includes(dow)) {
+            const slot = dow === 4 ? 'afternoon' : 'morning';
+            upcoming.push({
+                date:      d.toISOString().split('T')[0],
+                day_name:  DAYS[dow],
+                time_slot: slot,
+                time_label: TIME_LABELS[slot],
+                frequency: 'weekly',
+                days_away: offset,
+            });
+        }
+    }
+    return {
+        zone_id:   1,
+        zone_name: 'Kabulonga',
+        schedules: [
+            { id:1, day_of_week:0, day_name:'Monday',    time_slot:'morning',   time_label:'7 am – 12 pm', frequency:'weekly' },
+            { id:2, day_of_week:2, day_name:'Wednesday', time_slot:'morning',   time_label:'7 am – 12 pm', frequency:'weekly' },
+            { id:3, day_of_week:4, day_name:'Friday',    time_slot:'afternoon', time_label:'12 pm – 5 pm', frequency:'weekly' },
+        ],
+        upcoming,
+    };
+}
+
+function getDemoRequests() {
+    const d1 = new Date(); d1.setDate(d1.getDate() + 3);
+    return [{
+        id:              'demo-req-1',
+        requested_date:  d1.toISOString().split('T')[0],
+        time_preference: 'morning',
+        time_label:      '7 am – 12 pm',
+        description:     'Extra bags from house clean-up',
+        status:          'pending',
+        notes:           null,
+        created_at:      new Date().toISOString(),
+    }];
+}
+
+
+/* ============================================================================
+   LIVE TRUCK TRACKING PAGE
+   ============================================================================ */
+
+const trackState = {
+    map:       null,
+    markers:   {},    // driver_id → Leaflet marker
+    userMarker: null,
+    userLatLng: null,
+    timer:     null,
+    active:    false,
+    drivers:   [],
+};
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+function loadTrackingPage() {
+    if (!trackState.map) {
+        trackState.map = L.map('tracking-map').setView([-15.4167, 28.2833], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors', maxZoom: 19,
+        }).addTo(trackState.map);
+    } else {
+        setTimeout(() => trackState.map.invalidateSize(), 300);
+    }
+
+    // Get user location for ETA calculation
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            trackState.userLatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            if (!trackState.userMarker) {
+                const homeIcon = L.divIcon({
+                    className: '',
+                    html: '<div style="width:16px;height:16px;border-radius:50%;background:#3b82f6;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div>',
+                    iconSize: [16, 16], iconAnchor: [8, 8],
+                });
+                trackState.userMarker = L.marker(
+                    [trackState.userLatLng.lat, trackState.userLatLng.lng],
+                    { icon: homeIcon, zIndexOffset: 1000 }
+                ).addTo(trackState.map).bindPopup('<strong>Your location</strong>');
+            }
+            trackState.map.setView([trackState.userLatLng.lat, trackState.userLatLng.lng], 14);
+        });
+    }
+
+    startTracking();
+}
+
+// ── Start / stop ──────────────────────────────────────────────────────────────
+function startTracking() {
+    trackState.active = true;
+    updateTrackingToggleBtn();
+    refreshDriverLocations();
+    trackState.timer = setInterval(refreshDriverLocations, 10000);
+}
+
+function stopTracking() {
+    trackState.active = false;
+    clearInterval(trackState.timer);
+    trackState.timer = null;
+    updateTrackingToggleBtn();
+    document.getElementById('tracking-status-text').textContent = 'Paused';
+    document.querySelector('.live-pulse').classList.add('paused');
+}
+
+function updateTrackingToggleBtn() {
+    const btn   = document.getElementById('tracking-toggle-btn');
+    const label = document.getElementById('tracking-toggle-label');
+    const pulse = document.querySelector('.live-pulse');
+    if (trackState.active) {
+        btn.innerHTML  = '<i class="lucide-pause"></i> <span id="tracking-toggle-label">Pause</span>';
+        if (pulse) pulse.classList.remove('paused');
+    } else {
+        btn.innerHTML  = '<i class="lucide-play"></i> <span id="tracking-toggle-label">Resume</span>';
+        if (pulse) pulse.classList.add('paused');
+    }
+    lucide.createIcons();
+}
+
+document.getElementById('tracking-toggle-btn').addEventListener('click', () => {
+    trackState.active ? stopTracking() : startTracking();
+});
+
+// ── Refresh ───────────────────────────────────────────────────────────────────
+async function refreshDriverLocations() {
+    try {
+        trackState.drivers = await apiGetActiveDrivers();
+    } catch {
+        // Demo: simulate 3 drivers moving around Lusaka
+        trackState.drivers = getDemoDrivers();
+    }
+
+    updateDriverMarkers();
+    renderDriversList();
+    updateTrackingStatus();
+
+    const chip = document.getElementById('tracking-refresh-chip');
+    if (chip) chip.querySelector('#tracking-last-refresh').textContent =
+        'Updated ' + new Date().toLocaleTimeString('en-ZM', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+// ── Map markers ───────────────────────────────────────────────────────────────
+function makeTruckIcon(heading) {
+    return L.divIcon({
+        className: '',
+        html: `<div class="truck-marker-wrap">
+            <div class="truck-marker-ring"></div>
+            <div class="truck-marker-emoji" style="transform:rotate(${heading || 0}deg)">🚛</div>
+        </div>`,
+        iconSize:   [42, 42],
+        iconAnchor: [21, 21],
+    });
+}
+
+function updateDriverMarkers() {
+    const map       = trackState.map;
+    const drivers   = trackState.drivers || [];
+    const activeIds = new Set(drivers.map(d => d.driver_id));
+
+    // Remove stale markers
+    Object.keys(trackState.markers).forEach(id => {
+        if (!activeIds.has(id)) {
+            map.removeLayer(trackState.markers[id]);
+            delete trackState.markers[id];
+        }
+    });
+
+    drivers.forEach(d => {
+        const dist = trackState.userLatLng
+            ? haversineKm(trackState.userLatLng.lat, trackState.userLatLng.lng, d.latitude, d.longitude)
+            : null;
+        const eta  = dist !== null ? etaText(dist, d.speed_kmh) : '—';
+
+        const popup = `
+            <div style="font-family:Inter,sans-serif;min-width:160px;">
+                <strong style="font-size:0.9rem">🚛 ${escHtml(d.name)}</strong>
+                <div style="color:#94a3b8;font-size:0.75rem;margin:4px 0">${escHtml(d.route_name)}</div>
+                <hr style="border:none;border-top:1px solid rgba(255,255,255,0.1);margin:6px 0">
+                <div style="font-size:0.8rem">
+                    ${dist !== null ? `📍 ${dist.toFixed(1)} km away<br>` : ''}
+                    ⏱ ETA: <b style="color:#10b981">${eta}</b><br>
+                    🏎️ Speed: ${Math.round(d.speed_kmh || 0)} km/h
+                </div>
+            </div>`;
+
+        if (trackState.markers[d.driver_id]) {
+            trackState.markers[d.driver_id]
+                .setLatLng([d.latitude, d.longitude])
+                .setIcon(makeTruckIcon(d.heading))
+                .setPopupContent(popup);
+        } else {
+            trackState.markers[d.driver_id] = L.marker([d.latitude, d.longitude], {
+                icon: makeTruckIcon(d.heading),
+            }).addTo(map).bindPopup(popup);
+        }
+    });
+}
+
+// ── Drivers side panel ────────────────────────────────────────────────────────
+function renderDriversList() {
+    const drivers = trackState.drivers || [];
+    const countEl = document.getElementById('drivers-count-label');
+    countEl.textContent = `${drivers.length} active truck${drivers.length !== 1 ? 's' : ''}`;
+
+    const listEl = document.getElementById('drivers-list');
+    if (!drivers.length) {
+        listEl.innerHTML = '<div class="empty-state"><i class="lucide-truck"></i><p>No trucks on duty right now.</p></div>';
+        lucide.createIcons();
+        return;
+    }
+
+    // Sort by distance if we have user location
+    const withDist = drivers.map(d => {
+        const dist = trackState.userLatLng
+            ? haversineKm(trackState.userLatLng.lat, trackState.userLatLng.lng, d.latitude, d.longitude)
+            : null;
+        return { ...d, dist };
+    });
+    withDist.sort((a, b) => (a.dist ?? 9999) - (b.dist ?? 9999));
+
+    listEl.innerHTML = withDist.map((d, i) => {
+        const dist = d.dist !== null ? d.dist.toFixed(1) + ' km' : '—';
+        const eta  = d.dist !== null ? etaText(d.dist, d.speed_kmh) : '—';
+        return `
+            <div class="driver-card ${i === 0 ? 'nearest' : ''}"
+                 onclick="flyToDriver('${d.driver_id}')">
+                <div class="driver-card-top">
+                    <div class="driver-card-icon">🚛</div>
+                    <div>
+                        <div class="driver-card-name">${escHtml(d.name)}</div>
+                        <div class="driver-card-route">${escHtml(d.route_name)}</div>
+                    </div>
+                </div>
+                <div class="driver-card-stats">
+                    <div class="driver-stat">
+                        <div class="driver-stat-label">Distance</div>
+                        <div class="driver-stat-value">${dist}</div>
+                    </div>
+                    <div class="driver-stat">
+                        <div class="driver-stat-label">ETA</div>
+                        <div class="driver-stat-value eta">${eta}</div>
+                    </div>
+                    <div class="driver-stat">
+                        <div class="driver-stat-label">Speed</div>
+                        <div class="driver-stat-value">${Math.round(d.speed_kmh || 0)} km/h</div>
+                    </div>
+                    <div class="driver-stat">
+                        <div class="driver-stat-label">Updated</div>
+                        <div class="driver-stat-value" style="font-size:.72rem">${timeAgo(d.updated_at)}</div>
+                    </div>
+                </div>
+            </div>`;
+    }).join('');
+    lucide.createIcons();
+}
+
+function flyToDriver(driverId) {
+    const d = trackState.drivers.find(x => x.driver_id === driverId);
+    if (!d || !trackState.map) return;
+    trackState.map.flyTo([d.latitude, d.longitude], 16, { duration: 1.2 });
+    trackState.markers[driverId]?.openPopup();
+}
+
+function updateTrackingStatus() {
+    const count  = trackState.drivers.length;
+    const badge  = document.getElementById('tracking-status-badge');
+    const textEl = document.getElementById('tracking-status-text');
+    textEl.textContent = `${count} truck${count !== 1 ? 's' : ''} active`;
+    badge.style.borderColor = count > 0 ? 'var(--accent-primary)' : 'var(--border-color)';
+}
+
+// ── Haversine distance ────────────────────────────────────────────────────────
+function haversineKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function etaText(distKm, speedKmh) {
+    const speed = (speedKmh && speedKmh > 3) ? speedKmh : 25;
+    const mins  = Math.round((distKm / speed) * 60);
+    if (mins < 1) return 'Arriving';
+    if (mins < 60) return `~${mins} min`;
+    return `~${Math.floor(mins / 60)}h ${mins % 60}m`;
+}
+
+// ── Demo drivers (subtle movement each call) ──────────────────────────────────
+function getDemoDrivers() {
+    const t = Date.now() / 1000;
+    return [
+        {
+            driver_id: 'demo-d1', name: 'James Mulenga',
+            latitude:  -15.3920 + Math.sin(t * 0.018) * 0.005,
+            longitude:  28.3050 + Math.cos(t * 0.018) * 0.005,
+            heading: (t * 7) % 360, speed_kmh: 28,
+            route_name: 'Kabulonga Morning Run',
+            updated_at: new Date().toISOString(),
+        },
+        {
+            driver_id: 'demo-d2', name: 'Mary Chanda',
+            latitude:  -15.4150 + Math.sin(t * 0.013 + 2.1) * 0.006,
+            longitude:  28.2680 + Math.cos(t * 0.013 + 2.1) * 0.006,
+            heading: (t * 9) % 360, speed_kmh: 22,
+            route_name: 'Matero Afternoon Route',
+            updated_at: new Date().toISOString(),
+        },
+        {
+            driver_id: 'demo-d3', name: 'Peter Mwale',
+            latitude:  -15.3700 + Math.sin(t * 0.021 + 4.2) * 0.004,
+            longitude:  28.3500 + Math.cos(t * 0.021 + 4.2) * 0.004,
+            heading: (t * 11) % 360, speed_kmh: 35,
+            route_name: 'Chelston Route',
+            updated_at: new Date().toISOString(),
+        },
+    ];
+}
+
+// ── Stop tracking timer when leaving the page ─────────────────────────────────
+const _origNavigateTo = navigateTo;
+navigateTo = function(page) {
+    if (page !== 'tracking' && trackState.timer) {
+        stopTracking();
+        clearInterval(trackState.timer);
+        trackState.timer  = null;
+        trackState.active = false;
+    }
+    _origNavigateTo(page);
+};

@@ -69,6 +69,8 @@ def create_app(config_name: str | None = None) -> Flask:
     from app.api.zones     import zones_bp
     from app.api.drivers   import drivers_bp
     from app.api.alerts    import alerts_bp
+    from app.api.schedule  import schedule_bp
+    from app.api.tracking  import tracking_bp
 
     app.register_blueprint(auth_bp,      url_prefix="/api/auth")
     app.register_blueprint(bins_bp,      url_prefix="/api/bins")
@@ -83,6 +85,8 @@ def create_app(config_name: str | None = None) -> Flask:
     app.register_blueprint(zones_bp,     url_prefix="/api/zones")
     app.register_blueprint(drivers_bp,   url_prefix="/api/drivers")
     app.register_blueprint(alerts_bp,    url_prefix="/api/alerts")
+    app.register_blueprint(schedule_bp,  url_prefix="/api/schedule")
+    app.register_blueprint(tracking_bp,  url_prefix="/api/tracking")
 
     # ── Root health‐check ───────────────────────────────────────────────
     @app.route("/")

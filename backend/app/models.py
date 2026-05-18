@@ -330,3 +330,62 @@ class AuditLog(db.Model):
     details     = db.Column(db.JSON)
     ip_address  = db.Column(db.String(45))
     created_at  = db.Column(db.DateTime(timezone=True), default=utcnow)
+
+
+# ======================================================================
+# PICKUP SCHEDULES & CUSTOM PICKUP REQUESTS
+# ======================================================================
+class PickupSchedule(db.Model):
+    """Zone-level default collection schedule (which days trucks come)."""
+    __tablename__ = "pickup_schedules"
+
+    id          = db.Column(db.Integer, primary_key=True)
+    zone_id     = db.Column(db.Integer, db.ForeignKey("zones.id", ondelete="CASCADE"), nullable=False)
+    day_of_week = db.Column(db.Integer, nullable=False)   # 0=Mon … 6=Sun
+    time_slot   = db.Column(db.String(20), default="morning")   # morning / afternoon / evening
+    frequency   = db.Column(db.String(20), default="weekly")    # weekly / biweekly
+    is_active   = db.Column(db.Boolean, default=True)
+    created_at  = db.Column(db.DateTime(timezone=True), default=utcnow)
+
+    zone        = db.relationship("Zone", backref=db.backref("schedules", lazy="dynamic"))
+
+
+class PickupRequest(db.Model):
+    """Resident's request for a custom (non-default-schedule) pickup."""
+    __tablename__ = "pickup_requests"
+
+    id              = db.Column(db.String(36), primary_key=True, default=gen_uuid)
+    user_id         = db.Column(db.String(36), db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    zone_id         = db.Column(db.Integer, db.ForeignKey("zones.id"))
+    requested_date  = db.Column(db.Date, nullable=False)
+    time_preference = db.Column(db.String(20), default="morning")
+    description     = db.Column(db.Text)
+    # pending → confirmed → completed  |  pending → cancelled
+    status          = db.Column(db.String(20), default="pending")
+    confirmed_date  = db.Column(db.Date)
+    notes           = db.Column(db.Text)
+    created_at      = db.Column(db.DateTime(timezone=True), default=utcnow)
+    updated_at      = db.Column(db.DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    user = db.relationship("User", backref=db.backref("pickup_requests", lazy="dynamic"))
+
+
+# ======================================================================
+# REAL-TIME DRIVER LOCATIONS
+# ======================================================================
+class DriverLocation(db.Model):
+    """Live GPS position for a collector/driver (upserted on each ping)."""
+    __tablename__ = "driver_locations"
+
+    id         = db.Column(db.String(36), primary_key=True, default=gen_uuid)
+    driver_id  = db.Column(db.String(36), db.ForeignKey("users.id", ondelete="CASCADE"),
+                           nullable=False, unique=True)
+    latitude   = db.Column(db.Float, nullable=False, default=-15.4167)
+    longitude  = db.Column(db.Float, nullable=False, default=28.2833)
+    heading    = db.Column(db.Float, default=0)      # degrees 0–360
+    speed_kmh  = db.Column(db.Float, default=0)
+    is_on_duty = db.Column(db.Boolean, default=False)
+    route_name = db.Column(db.String(150))
+    updated_at = db.Column(db.DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    driver = db.relationship("User", backref=db.backref("location", uselist=False))

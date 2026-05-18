@@ -982,3 +982,355 @@ img { max-width: 100%; display: block; }
 }
 .leaflet-popup-content { margin: 12px 16px !important; font-size: 0.82rem !important; }
 .leaflet-popup-tip { background: var(--bg-secondary) !important; }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PICKUP SCHEDULE PAGE
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Zone banner ───────────────────────────────────────────────────────────── */
+.schedule-zone-card {
+    display: flex; align-items: center; gap: 18px;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(16,185,129,0.07) 100%);
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-xl);
+    padding: 22px 28px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+.schedule-zone-icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--accent-subtle);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent-primary); font-size: 1.2rem; flex-shrink: 0;
+}
+.schedule-zone-info { flex: 1; min-width: 160px; }
+.schedule-zone-name { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+.schedule-zone-days { font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px; }
+
+.schedule-next-pill {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--accent-subtle);
+    border: 1px solid var(--accent-primary);
+    border-radius: var(--radius-lg); padding: 12px 18px;
+    color: var(--text-accent); flex-shrink: 0;
+}
+.next-pill-label { font-size: 0.72rem; color: var(--text-secondary); }
+.next-pill-value  { font-size: 0.88rem; font-weight: 700; color: var(--text-accent); margin-top: 2px; }
+
+
+/* ── Weekly calendar ───────────────────────────────────────────────────────── */
+.calendar-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 22px 24px;
+    margin-bottom: 0;
+}
+.calendar-nav {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 18px;
+}
+.cal-week-label {
+    flex: 1; text-align: center;
+    font-size: 0.88rem; font-weight: 600; color: var(--text-primary);
+}
+.cal-nav-btn {
+    width: 32px; height: 32px; border-radius: var(--radius-sm);
+    background: var(--bg-input); border: 1px solid var(--border-color);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); transition: all var(--transition-fast);
+}
+.cal-nav-btn:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+.week-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+}
+.week-day-cell {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 10px 6px;
+    text-align: center;
+    transition: all var(--transition-fast);
+    cursor: default;
+    min-height: 82px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.week-day-cell.clickable { cursor: pointer; }
+.week-day-cell.clickable:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-glass);
+}
+.week-day-cell.cal-past { opacity: 0.4; }
+.week-day-cell.cal-today {
+    border-color: var(--accent-primary);
+    background: var(--accent-subtle);
+}
+.week-day-cell.cal-collection {
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.4);
+}
+.week-day-cell.cal-today.cal-collection {
+    background: var(--accent-subtle);
+    border-color: var(--accent-primary);
+}
+.week-day-cell.cal-has-request {
+    border-color: var(--warning);
+    background: rgba(245,158,11,0.07);
+}
+
+.wdc-name  { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); letter-spacing:.04em; text-transform:uppercase; }
+.wdc-date  { font-size: 1rem; font-weight: 700; color: var(--text-primary); line-height:1; }
+.cal-today .wdc-date { color: var(--accent-primary); }
+.wdc-icons { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 4px; }
+.wdc-truck {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 1px 3px rgba(16,185,129,0.4));
+}
+.wdc-slot  { font-size: 0.6rem; color: var(--text-accent); font-weight: 600; }
+.wdc-req   { font-size: 0.75rem; }
+.wdc-req-label { font-size: 0.58rem; color: var(--warning); font-weight: 600; }
+
+.cal-legend {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+.cal-legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.74rem; color: var(--text-muted);
+}
+.cal-legend-dot {
+    width: 10px; height: 10px; border-radius: 3px;
+}
+.cal-legend-dot.truck   { background: rgba(16,185,129,0.5); border: 1px solid var(--accent-primary); }
+.cal-legend-dot.request { background: rgba(245,158,11,0.4); border: 1px solid var(--warning); }
+.cal-legend-dot.today   { background: var(--accent-subtle); border: 1px solid var(--accent-primary); }
+
+
+/* ── Upcoming collection list ─────────────────────────────────────────────── */
+.upcoming-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border-color);
+}
+.upcoming-item:last-child { border-bottom: none; }
+
+.upcoming-icon {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    background: var(--accent-subtle);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+}
+.upcoming-icon.soon { background: rgba(245,158,11,0.15); }
+.upcoming-body { flex: 1; }
+.upcoming-date { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+.upcoming-meta { font-size: 0.74rem; color: var(--text-muted); margin-top: 2px; }
+.upcoming-badge {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+    background: var(--accent-subtle); color: var(--accent-primary);
+}
+.upcoming-badge.soon {
+    background: rgba(245,158,11,0.15); color: var(--warning);
+}
+
+
+/* ── Pickup request list items ────────────────────────────────────────────── */
+.pickup-req-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 0; border-bottom: 1px solid var(--border-color);
+}
+.pickup-req-item:last-child { border-bottom: none; }
+
+.pickup-req-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.pickup-req-dot.pending   { background: var(--warning); }
+.pickup-req-dot.confirmed { background: var(--success); }
+.pickup-req-dot.cancelled { background: var(--text-muted); }
+.pickup-req-dot.completed { background: var(--info); }
+
+.pickup-req-body { flex: 1; }
+.pickup-req-date { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+.pickup-req-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+.pickup-req-status {
+    font-size: 0.68rem; font-weight: 700; padding: 3px 8px;
+    border-radius: 20px; text-transform: capitalize;
+}
+.pickup-req-status.pending   { background: rgba(245,158,11,0.15); color: var(--warning); }
+.pickup-req-status.confirmed { background: var(--success-soft);   color: var(--success); }
+.pickup-req-status.cancelled { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+.pickup-req-status.completed { background: var(--info-soft);       color: var(--info); }
+
+.cancel-req-btn {
+    font-size: 0.7rem; padding: 4px 10px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color); color: var(--text-muted);
+    transition: all var(--transition-fast); flex-shrink: 0;
+}
+.cancel-req-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIVE TRACKING PAGE
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Status badge ──────────────────────────────────────────────────────────── */
+.tracking-status-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+}
+
+.live-pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent-primary);
+    box-shadow: 0 0 0 0 rgba(16,185,129,0.5);
+    animation: livePulse 1.8s infinite;
+}
+@keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0   rgba(16,185,129,0.7); }
+    70%  { box-shadow: 0 0 0 10px rgba(16,185,129,0);   }
+    100% { box-shadow: 0 0 0 0   rgba(16,185,129,0);   }
+}
+.live-pulse.paused { background: var(--text-muted); animation: none; }
+
+
+/* ── Main layout ───────────────────────────────────────────────────────────── */
+.tracking-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 20px;
+    height: calc(100vh - 220px);
+    min-height: 480px;
+}
+@media (max-width: 900px) {
+    .tracking-layout { grid-template-columns: 1fr; height: auto; }
+}
+
+
+/* ── Map area ──────────────────────────────────────────────────────────────── */
+.tracking-map-wrap {
+    position: relative; border-radius: var(--radius-xl); overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+.tracking-map { width: 100%; height: 100%; min-height: 400px; }
+
+.tracking-map-legend {
+    position: absolute; bottom: 14px; left: 14px; z-index: 500;
+    background: rgba(13,19,33,0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+}
+.tmap-legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.73rem; color: var(--text-secondary);
+}
+.tmap-dot {
+    width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+}
+.tmap-dot.home  { background: #3b82f6; border: 2px solid #fff; }
+.tmap-dot.truck { background: var(--accent-primary); border: 2px solid #fff; }
+
+.tracking-refresh-chip {
+    position: absolute; top: 14px; right: 14px; z-index: 500;
+    background: rgba(13,19,33,0.88);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px; padding: 5px 12px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.72rem; color: var(--text-muted);
+}
+
+
+/* ── Drivers side panel ────────────────────────────────────────────────────── */
+.drivers-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+.drivers-panel-header {
+    padding: 16px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem; font-weight: 700; color: var(--text-primary);
+    background: rgba(0,0,0,0.15);
+}
+.drivers-panel-sub { font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+
+#drivers-list {
+    flex: 1; overflow-y: auto; padding: 10px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+
+
+/* ── Individual driver card ────────────────────────────────────────────────── */
+.driver-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); padding: 14px;
+    transition: border-color var(--transition-fast);
+    cursor: pointer;
+}
+.driver-card:hover { border-color: var(--border-hover); }
+.driver-card.nearest { border-color: var(--accent-primary); }
+
+.driver-card-top {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.driver-card-icon {
+    width: 40px; height: 40px; flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--accent-subtle);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+}
+.driver-card-name { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+.driver-card-route { font-size: 0.74rem; color: var(--text-muted); margin-top: 2px; }
+
+.driver-card-stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.driver-stat {
+    background: var(--bg-input);
+    border-radius: var(--radius-sm); padding: 8px 10px;
+}
+.driver-stat-label { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+.driver-stat-value { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-top: 3px; }
+.driver-stat-value.eta { color: var(--accent-primary); }
+
+.driver-no-location {
+    font-size: 0.72rem; color: var(--text-muted);
+    text-align: center; padding: 4px;
+}
+
+
+/* ── Truck Leaflet markers ────────────────────────────────────────────────── */
+.truck-marker-wrap {
+    position: relative; width: 42px; height: 42px;
+}
+.truck-marker-ring {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(16,185,129,0.25);
+    animation: truckPulse 2.2s infinite ease-out;
+}
+@keyframes truckPulse {
+    0%   { transform: scale(0.7); opacity: 0.9; }
+    70%  { transform: scale(1.9); opacity: 0;   }
+    100% { transform: scale(0.7); opacity: 0;   }
+}
+.truck-marker-emoji {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+}

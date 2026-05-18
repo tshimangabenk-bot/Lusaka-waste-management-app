@@ -81,6 +81,18 @@
                 </div>
 
                 <div class="nav-group">
+                    <span class="nav-group-label">Collection</span>
+                    <button class="nav-item" data-page="schedule" type="button">
+                        <i class="lucide-calendar-days"></i>
+                        <span>Pickup Schedule</span>
+                    </button>
+                    <button class="nav-item" data-page="tracking" type="button">
+                        <i class="lucide-truck"></i>
+                        <span>Track Trucks</span>
+                    </button>
+                </div>
+
+                <div class="nav-group">
                     <span class="nav-group-label">Community</span>
                     <button class="nav-item" data-page="bins" type="button">
                         <i class="lucide-map-pin"></i>
@@ -296,6 +308,135 @@
 
                 </section>
 
+                <!-- ══════════════ PAGE: PICKUP SCHEDULE ══════════════ -->
+                <section class="page-section" id="page-schedule">
+
+                    <div class="page-header">
+                        <div>
+                            <h2>Pickup Schedule</h2>
+                            <p class="page-sub">Your zone's collection days — and request a custom pickup</p>
+                        </div>
+                        <button class="btn btn-primary" id="request-pickup-btn" type="button">
+                            <i class="lucide-plus"></i>
+                            Request pickup
+                        </button>
+                    </div>
+
+                    <!-- Zone info banner -->
+                    <div class="schedule-zone-card" id="schedule-zone-card">
+                        <div class="schedule-zone-icon">
+                            <i class="lucide-map-pin"></i>
+                        </div>
+                        <div class="schedule-zone-info">
+                            <div class="schedule-zone-name" id="sched-zone-name">Loading zone…</div>
+                            <div class="schedule-zone-days" id="sched-zone-days">—</div>
+                        </div>
+                        <div class="schedule-next-pill" id="sched-next-pill">
+                            <i class="lucide-truck"></i>
+                            <div>
+                                <div class="next-pill-label">Next collection</div>
+                                <div class="next-pill-value" id="sched-next-text">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly calendar -->
+                    <div class="calendar-section">
+                        <div class="calendar-nav">
+                            <button class="cal-nav-btn" id="cal-prev-week" type="button">
+                                <i class="lucide-chevron-left"></i>
+                            </button>
+                            <span class="cal-week-label" id="cal-week-label">—</span>
+                            <button class="cal-nav-btn" id="cal-next-week" type="button">
+                                <i class="lucide-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="week-grid" id="week-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div class="cal-legend">
+                            <span class="cal-legend-item"><span class="cal-legend-dot truck"></span> Collection day</span>
+                            <span class="cal-legend-item"><span class="cal-legend-dot request"></span> Your request</span>
+                            <span class="cal-legend-item"><span class="cal-legend-dot today"></span> Today</span>
+                        </div>
+                    </div>
+
+                    <!-- Two-col: upcoming + requests -->
+                    <div class="two-col" style="margin-top:20px">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-calendar-check"></i> Upcoming collections</h3>
+                                <span class="card-subtitle">Next 14 days</span>
+                            </div>
+                            <div class="card-body" id="upcoming-list">
+                                <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading…</span></div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="lucide-star"></i> My requests</h3>
+                                <span class="card-subtitle" id="sched-requests-badge"></span>
+                            </div>
+                            <div class="card-body" id="my-requests-list">
+                                <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading…</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- ══════════════ PAGE: TRACK TRUCKS ══════════════ -->
+                <section class="page-section" id="page-tracking">
+
+                    <div class="page-header">
+                        <div>
+                            <h2>Live Truck Tracking</h2>
+                            <p class="page-sub">See where collection trucks are right now</p>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                            <div class="tracking-status-badge" id="tracking-status-badge">
+                                <span class="live-pulse"></span>
+                                <span id="tracking-status-text">Loading…</span>
+                            </div>
+                            <button class="btn btn-secondary" id="tracking-toggle-btn" type="button">
+                                <i class="lucide-pause"></i>
+                                <span id="tracking-toggle-label">Pause</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tracking-layout">
+                        <!-- Map -->
+                        <div class="tracking-map-wrap">
+                            <div id="tracking-map" class="tracking-map"></div>
+                            <div class="tracking-map-legend">
+                                <div class="tmap-legend-item">
+                                    <span class="tmap-dot home"></span> Your location
+                                </div>
+                                <div class="tmap-legend-item">
+                                    <span class="tmap-dot truck"></span> Active truck
+                                </div>
+                            </div>
+                            <div class="tracking-refresh-chip" id="tracking-refresh-chip">
+                                <i class="lucide-refresh-cw"></i>
+                                <span id="tracking-last-refresh">—</span>
+                            </div>
+                        </div>
+
+                        <!-- Drivers panel -->
+                        <div class="drivers-panel">
+                            <div class="drivers-panel-header">
+                                <span id="drivers-count-label">Active trucks</span>
+                                <span class="drivers-panel-sub">Updates every 10 s</span>
+                            </div>
+                            <div id="drivers-list">
+                                <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading trucks…</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+
                 <!-- ══════════════ PAGE: NEARBY BINS ══════════════ -->
                 <section class="page-section" id="page-bins">
 
@@ -410,6 +551,51 @@
                 <button class="btn btn-primary" id="submit-report-form" type="button">
                     <i class="lucide-send"></i>
                     Submit report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ MODAL: Request Custom Pickup ═══════════════════════ -->
+    <div class="modal-backdrop" id="pickup-modal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickup-modal-title">
+            <div class="modal-header">
+                <h3 id="pickup-modal-title">
+                    <i class="lucide-calendar-plus"></i>
+                    Request a custom pickup
+                </h3>
+                <button class="modal-close" id="close-pickup-modal" aria-label="Close" type="button">
+                    <i class="lucide-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="pickup-date">Preferred date</label>
+                    <input class="form-input" id="pickup-date" type="date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pickup-time">Preferred time slot</label>
+                    <select class="form-select" id="pickup-time">
+                        <option value="morning">Morning (7 am – 12 pm)</option>
+                        <option value="afternoon">Afternoon (12 pm – 5 pm)</option>
+                        <option value="evening">Evening (5 pm – 8 pm)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="pickup-description">Instructions (optional)</label>
+                    <textarea class="form-textarea" id="pickup-description" rows="3"
+                        placeholder="e.g. Large items, garden waste, extra bags…"></textarea>
+                </div>
+                <div class="modal-note">
+                    <i class="lucide-info"></i>
+                    Requests are reviewed within 24 hours. You'll get a notification when confirmed.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-pickup-modal" type="button">Cancel</button>
+                <button class="btn btn-primary" id="submit-pickup-form" type="button">
+                    <i class="lucide-send"></i>
+                    Submit request
                 </button>
             </div>
         </div>

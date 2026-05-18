@@ -120,3 +120,16 @@ async function apiGetNearbyBins(lat, lng, radius = 1000) {
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 async function apiGetNotifications() { return apiFetch('/users/me/notifications'); }
+
+// ── Pickup Schedule ───────────────────────────────────────────────────────────
+async function apiGetZoneSchedule()    { return apiFetch('/schedule/zone'); }
+async function apiGetMyRequests()      { return apiFetch('/schedule/requests'); }
+async function apiCreatePickupRequest(body) {
+    return apiFetch('/schedule/requests', { method: 'POST', body: JSON.stringify(body) });
+}
+async function apiCancelPickupRequest(id) {
+    return apiFetch(`/schedule/requests/${id}/cancel`, { method: 'PATCH' });
+}
+
+// ── Live Driver Tracking ──────────────────────────────────────────────────────
+async function apiGetActiveDrivers() { return apiFetch('/tracking/drivers'); }

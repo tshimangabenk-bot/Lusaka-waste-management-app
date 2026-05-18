@@ -10,6 +10,7 @@ from app.models import (
     User, UserReward, RewardCatalog, RewardTransaction,
     Report, UserNotification, SmartBin, Zone, Vehicle,
     CollectionRoute, RouteStop, Alert, MLModel,
+    PickupSchedule, DriverLocation,
 )
 
 
@@ -298,6 +299,58 @@ def seed():
         ]
         for m in ml_models:
             db.session.add(MLModel(**m))
+
+        # ── Pickup schedules (zone default collection days) ────────────────
+        schedules_data = [
+            # Kabulonga: Mon, Wed, Fri — morning
+            ("Kabulonga",  0, "morning"),
+            ("Kabulonga",  2, "morning"),
+            ("Kabulonga",  4, "afternoon"),
+            # Northmead: Tue, Thu, Sat — morning
+            ("Northmead",  1, "morning"),
+            ("Northmead",  3, "morning"),
+            ("Northmead",  5, "afternoon"),
+            # Kanyama: Mon, Wed, Fri — morning (high density — 3×/week)
+            ("Kanyama",    0, "morning"),
+            ("Kanyama",    2, "morning"),
+            ("Kanyama",    4, "morning"),
+            # Matero: Tue, Thu — morning
+            ("Matero",     1, "morning"),
+            ("Matero",     3, "afternoon"),
+            # Chelston: Mon, Thu, Sat — morning
+            ("Chelston",   0, "morning"),
+            ("Chelston",   3, "morning"),
+            ("Chelston",   5, "afternoon"),
+        ]
+        for zone_name, dow, slot in schedules_data:
+            db.session.add(PickupSchedule(
+                zone_id=zones[zone_name].id,
+                day_of_week=dow,
+                time_slot=slot,
+                frequency="weekly",
+                is_active=True,
+            ))
+
+        # ── Driver locations (seeded on duty for demo) ─────────────────────
+        db.session.flush()   # ensure driver1 / driver2 have IDs
+        db.session.add(DriverLocation(
+            driver_id=driver1.id,
+            latitude=-15.3920,
+            longitude=28.3050,
+            heading=45,
+            speed_kmh=28,
+            is_on_duty=True,
+            route_name="Kabulonga Morning Run",
+        ))
+        db.session.add(DriverLocation(
+            driver_id=driver2.id,
+            latitude=-15.4150,
+            longitude=28.2680,
+            heading=200,
+            speed_kmh=22,
+            is_on_duty=True,
+            route_name="Matero Afternoon Route",
+        ))
 
         db.session.commit()
         print("\nDatabase seeded successfully!")
