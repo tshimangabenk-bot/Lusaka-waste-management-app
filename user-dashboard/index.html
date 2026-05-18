@@ -1,30 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="SmartWaste Lusaka — Resident Portal. Track your reports, earn green points, find nearby bins, and help keep Lusaka clean.">
+    <meta name="description" content="SmartWaste Lusaka — Resident Portal. Track your reports, earn green points, find nearby bins, and help keep Lusaka clean.">
     <title>SmartWaste — Resident Portal | Lusaka</title>
-
-    <!-- Google Fonts — Inter + JetBrains Mono (matches admin) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Icons, Map, Charts -->
     <script src="vendor/dashboard/vendor/lucide.js"></script>
     <link rel="stylesheet" href="vendor/dashboard/vendor/leaflet.css" />
     <script src="vendor/dashboard/vendor/chart.js"></script>
     <script src="vendor/dashboard/vendor/leaflet.js"></script>
-
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
 
-    <!-- Background Glows -->
     <div class="bg-glow bg-glow-1"></div>
     <div class="bg-glow bg-glow-2"></div>
 
@@ -33,7 +26,6 @@
         <!-- ═══════════════════════ SIDEBAR ═══════════════════════ -->
         <aside class="sidebar" id="sidebar">
 
-            <!-- Brand header -->
             <div class="sidebar-header">
                 <div class="sidebar-logo">♻️</div>
                 <div class="sidebar-brand">
@@ -42,7 +34,6 @@
                 </div>
             </div>
 
-            <!-- User card + points -->
             <div class="sidebar-user-section">
                 <div class="sidebar-user" id="sidebar-user">
                     <div class="user-avatar" id="sidebar-avatar">JD</div>
@@ -61,55 +52,68 @@
                 </div>
             </div>
 
-            <!-- Nav -->
             <nav class="sidebar-nav">
                 <div class="nav-group">
-                    <span class="nav-group-label">My Space</span>
+                    <span class="nav-group-label">Main</span>
                     <button class="nav-item active" data-page="overview" type="button">
-                        <i class="lucide-home"></i>
-                        <span>Overview</span>
+                        <i class="lucide-home"></i><span>Home</span>
                     </button>
-                    <button class="nav-item" data-page="reports" type="button">
-                        <i class="lucide-flag"></i>
-                        <span>My Reports</span>
-                        <span class="nav-badge" id="badge-reports" style="display:none">0</span>
+                    <button class="nav-item nav-action" data-action="open-report" type="button">
+                        <i class="lucide-alert-triangle"></i><span>Report Waste</span>
                     </button>
-                    <button class="nav-item" data-page="rewards" type="button">
-                        <i class="lucide-gift"></i>
-                        <span>Rewards</span>
+                    <button class="nav-item" data-page="analytics" type="button">
+                        <i class="lucide-bar-chart-2"></i><span>Analytics</span>
+                    </button>
+                    <button class="nav-item" data-page="notifications" type="button">
+                        <i class="lucide-bell"></i><span>Notifications</span>
+                        <span class="nav-badge" id="badge-notifs" style="display:none">0</span>
                     </button>
                 </div>
 
                 <div class="nav-group">
                     <span class="nav-group-label">Collection</span>
                     <button class="nav-item" data-page="schedule" type="button">
-                        <i class="lucide-calendar-days"></i>
-                        <span>Pickup Schedule</span>
+                        <i class="lucide-calendar-days"></i><span>Schedule Pickup</span>
+                    </button>
+                    <button class="nav-item" data-page="my-requests" type="button">
+                        <i class="lucide-list-checks"></i><span>Track Requests</span>
+                        <span class="nav-badge" id="badge-requests" style="display:none">0</span>
                     </button>
                     <button class="nav-item" data-page="tracking" type="button">
-                        <i class="lucide-truck"></i>
-                        <span>Track Trucks</span>
+                        <i class="lucide-truck"></i><span>Realtime Tracking</span>
                     </button>
                 </div>
 
                 <div class="nav-group">
-                    <span class="nav-group-label">Community</span>
-                    <button class="nav-item" data-page="bins" type="button">
-                        <i class="lucide-map-pin"></i>
-                        <span>Nearby Bins</span>
+                    <span class="nav-group-label">Green Living</span>
+                    <button class="nav-item" data-page="rewards" type="button">
+                        <i class="lucide-gift"></i><span>Recycling Rewards</span>
                     </button>
-                    <button class="nav-item" data-page="notifications" type="button">
-                        <i class="lucide-bell"></i>
-                        <span>Notifications</span>
-                        <span class="nav-badge" id="badge-notifs" style="display:none">0</span>
+                    <button class="nav-item" data-page="recycling-centers" type="button">
+                        <i class="lucide-recycle"></i><span>Recycling Centers</span>
+                    </button>
+                    <button class="nav-item" data-page="bins" type="button">
+                        <i class="lucide-map-pin"></i><span>Nearby Bins</span>
+                    </button>
+                </div>
+
+                <div class="nav-group">
+                    <span class="nav-group-label">Account</span>
+                    <button class="nav-item" data-page="payment-history" type="button">
+                        <i class="lucide-credit-card"></i><span>Payment History</span>
+                    </button>
+                    <button class="nav-item" data-page="support" type="button">
+                        <i class="lucide-headphones"></i><span>Support</span>
+                    </button>
+                    <button class="nav-item" data-page="settings" type="button">
+                        <i class="lucide-settings"></i><span>Settings</span>
                     </button>
                 </div>
             </nav>
 
             <div class="sidebar-footer">
                 <button class="nav-item" id="logout-btn" type="button">
-                    <i class="lucide-log-out"></i>
-                    <span>Sign out</span>
+                    <i class="lucide-log-out"></i><span>Sign out</span>
                 </button>
             </div>
         </aside>
@@ -117,20 +121,21 @@
         <!-- ═══════════════════════ MAIN CONTENT ═══════════════════════ -->
         <main class="main-content" id="mainContent">
 
-            <!-- Top Header -->
             <header class="top-header">
                 <div class="header-left">
                     <button class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle sidebar">
                         <i class="lucide-menu"></i>
                     </button>
                     <div class="page-title-section">
-                        <h2 id="topbar-title">Overview</h2>
+                        <h2 id="topbar-title">Home</h2>
                     </div>
                 </div>
                 <div class="header-right">
+                    <button class="icon-btn" id="theme-toggle-btn" title="Toggle light/dark theme">
+                        <i class="lucide-moon"></i>
+                    </button>
                     <button class="action-btn" id="new-report-btn" type="button">
-                        <i class="lucide-plus"></i>
-                        <span>Report issue</span>
+                        <i class="lucide-plus"></i><span>Report issue</span>
                     </button>
                 </div>
             </header>
@@ -139,7 +144,6 @@
 
                 <!-- ══════════════ PAGE: OVERVIEW ══════════════ -->
                 <section class="page-section active" id="page-overview">
-
                     <div class="page-hero">
                         <div class="hero-text">
                             <p class="hero-greeting" id="hero-greeting">Good morning,</p>
@@ -155,123 +159,88 @@
                             <p>Green Points</p>
                         </div>
                     </div>
-
-                    <!-- Stats strip -->
                     <div class="stats-strip">
                         <div class="stat-card">
-                            <div class="stat-icon stat-icon--blue">
-                                <i class="lucide-flag"></i>
-                            </div>
+                            <div class="stat-icon stat-icon--blue"><i class="lucide-flag"></i></div>
                             <div class="stat-body">
                                 <span class="stat-value" id="stat-total">—</span>
                                 <span class="stat-label">Total reports</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon stat-icon--amber">
-                                <i class="lucide-clock"></i>
-                            </div>
+                            <div class="stat-icon stat-icon--amber"><i class="lucide-clock"></i></div>
                             <div class="stat-body">
                                 <span class="stat-value" id="stat-pending">—</span>
                                 <span class="stat-label">Pending</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon stat-icon--green">
-                                <i class="lucide-check-circle-2"></i>
-                            </div>
+                            <div class="stat-icon stat-icon--green"><i class="lucide-check-circle-2"></i></div>
                             <div class="stat-body">
                                 <span class="stat-value" id="stat-resolved">—</span>
                                 <span class="stat-label">Resolved</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon stat-icon--purple">
-                                <i class="lucide-trophy"></i>
-                            </div>
+                            <div class="stat-icon stat-icon--purple"><i class="lucide-trophy"></i></div>
                             <div class="stat-body">
                                 <span class="stat-value" id="stat-lifetime">—</span>
                                 <span class="stat-label">Lifetime points</span>
                             </div>
                         </div>
                     </div>
-
                     <div class="two-col">
-                        <!-- Recent reports -->
                         <div class="card">
                             <div class="card-header">
                                 <h3><i class="lucide-flag"></i> Recent reports</h3>
                                 <button class="link-btn" data-page="reports" type="button">View all →</button>
                             </div>
                             <div class="card-body" id="overview-reports">
-                                <div class="skeleton-list">
-                                    <div class="skeleton"></div>
-                                    <div class="skeleton"></div>
-                                    <div class="skeleton"></div>
-                                </div>
+                                <div class="skeleton-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
                             </div>
                         </div>
-
-                        <!-- Points activity -->
                         <div class="card">
                             <div class="card-header">
                                 <h3><i class="lucide-leaf"></i> Points activity</h3>
                                 <button class="link-btn" data-page="rewards" type="button">Redeem →</button>
                             </div>
                             <div class="card-body" id="overview-transactions">
-                                <div class="skeleton-list">
-                                    <div class="skeleton"></div>
-                                    <div class="skeleton"></div>
-                                    <div class="skeleton"></div>
-                                </div>
+                                <div class="skeleton-list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
                             </div>
                         </div>
                     </div>
-
                 </section>
 
                 <!-- ══════════════ PAGE: MY REPORTS ══════════════ -->
                 <section class="page-section" id="page-reports">
-
                     <div class="page-header">
                         <div>
                             <h2>My Reports</h2>
                             <p class="page-sub">Issues you've submitted to Lusaka City Council</p>
                         </div>
                         <button class="btn btn-primary" id="submit-report-btn" type="button">
-                            <i class="lucide-plus"></i>
-                            New report
+                            <i class="lucide-plus"></i> New report
                         </button>
                     </div>
-
-                    <!-- Filter tabs -->
                     <div class="filter-tabs" role="tablist">
                         <button class="filter-tab active" data-filter="all" role="tab">All</button>
                         <button class="filter-tab" data-filter="pending" role="tab">Pending</button>
                         <button class="filter-tab" data-filter="in_progress" role="tab">In progress</button>
                         <button class="filter-tab" data-filter="resolved" role="tab">Resolved</button>
                     </div>
-
                     <div class="reports-grid" id="reports-grid">
-                        <div class="loading-state">
-                            <i class="lucide-loader-2"></i>
-                            <span>Loading reports…</span>
-                        </div>
+                        <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading reports…</span></div>
                     </div>
-
                 </section>
 
                 <!-- ══════════════ PAGE: REWARDS ══════════════ -->
                 <section class="page-section" id="page-rewards">
-
                     <div class="page-header">
                         <div>
-                            <h2>Rewards</h2>
+                            <h2>Recycling Rewards</h2>
                             <p class="page-sub">Redeem your green points for real benefits</p>
                         </div>
                     </div>
-
-                    <!-- Balance card -->
                     <div class="balance-banner">
                         <div class="balance-left">
                             <div class="balance-icon"><i class="lucide-leaf"></i></div>
@@ -285,48 +254,31 @@
                             <span class="balance-lifetime" id="balance-lifetime">—</span>
                         </div>
                     </div>
-
-                    <!-- Catalog -->
                     <h3 class="section-title">Catalog</h3>
                     <div class="catalog-grid" id="catalog-grid">
-                        <div class="loading-state">
-                            <i class="lucide-loader-2"></i>
-                            <span>Loading catalog…</span>
-                        </div>
+                        <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading catalog…</span></div>
                     </div>
-
-                    <!-- Transaction history -->
                     <h3 class="section-title" style="margin-top:2rem">Points history</h3>
                     <div class="card">
                         <div class="card-body" id="rewards-history">
-                            <div class="loading-state">
-                                <i class="lucide-loader-2"></i>
-                                <span>Loading…</span>
-                            </div>
+                            <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading…</span></div>
                         </div>
                     </div>
-
                 </section>
 
                 <!-- ══════════════ PAGE: PICKUP SCHEDULE ══════════════ -->
                 <section class="page-section" id="page-schedule">
-
                     <div class="page-header">
                         <div>
-                            <h2>Pickup Schedule</h2>
+                            <h2>Schedule Pickup</h2>
                             <p class="page-sub">Your zone's collection days — and request a custom pickup</p>
                         </div>
                         <button class="btn btn-primary" id="request-pickup-btn" type="button">
-                            <i class="lucide-plus"></i>
-                            Request pickup
+                            <i class="lucide-plus"></i> Request pickup
                         </button>
                     </div>
-
-                    <!-- Zone info banner -->
                     <div class="schedule-zone-card" id="schedule-zone-card">
-                        <div class="schedule-zone-icon">
-                            <i class="lucide-map-pin"></i>
-                        </div>
+                        <div class="schedule-zone-icon"><i class="lucide-map-pin"></i></div>
                         <div class="schedule-zone-info">
                             <div class="schedule-zone-name" id="sched-zone-name">Loading zone…</div>
                             <div class="schedule-zone-days" id="sched-zone-days">—</div>
@@ -339,29 +291,19 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Weekly calendar -->
                     <div class="calendar-section">
                         <div class="calendar-nav">
-                            <button class="cal-nav-btn" id="cal-prev-week" type="button">
-                                <i class="lucide-chevron-left"></i>
-                            </button>
+                            <button class="cal-nav-btn" id="cal-prev-week" type="button"><i class="lucide-chevron-left"></i></button>
                             <span class="cal-week-label" id="cal-week-label">—</span>
-                            <button class="cal-nav-btn" id="cal-next-week" type="button">
-                                <i class="lucide-chevron-right"></i>
-                            </button>
+                            <button class="cal-nav-btn" id="cal-next-week" type="button"><i class="lucide-chevron-right"></i></button>
                         </div>
-                        <div class="week-grid" id="week-grid">
-                            <!-- Populated by JS -->
-                        </div>
+                        <div class="week-grid" id="week-grid"></div>
                         <div class="cal-legend">
                             <span class="cal-legend-item"><span class="cal-legend-dot truck"></span> Collection day</span>
                             <span class="cal-legend-item"><span class="cal-legend-dot request"></span> Your request</span>
                             <span class="cal-legend-item"><span class="cal-legend-dot today"></span> Today</span>
                         </div>
                     </div>
-
-                    <!-- Two-col: upcoming + requests -->
                     <div class="two-col" style="margin-top:20px">
                         <div class="card">
                             <div class="card-header">
@@ -382,15 +324,13 @@
                             </div>
                         </div>
                     </div>
-
                 </section>
 
-                <!-- ══════════════ PAGE: TRACK TRUCKS ══════════════ -->
+                <!-- ══════════════ PAGE: REALTIME TRACKING ══════════════ -->
                 <section class="page-section" id="page-tracking">
-
                     <div class="page-header">
                         <div>
-                            <h2>Live Truck Tracking</h2>
+                            <h2>Realtime Tracking</h2>
                             <p class="page-sub">See where collection trucks are right now</p>
                         </div>
                         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -404,26 +344,18 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="tracking-layout">
-                        <!-- Map -->
                         <div class="tracking-map-wrap">
                             <div id="tracking-map" class="tracking-map"></div>
                             <div class="tracking-map-legend">
-                                <div class="tmap-legend-item">
-                                    <span class="tmap-dot home"></span> Your location
-                                </div>
-                                <div class="tmap-legend-item">
-                                    <span class="tmap-dot truck"></span> Active truck
-                                </div>
+                                <div class="tmap-legend-item"><span class="tmap-dot home"></span> Your location</div>
+                                <div class="tmap-legend-item"><span class="tmap-dot truck"></span> Active truck</div>
                             </div>
                             <div class="tracking-refresh-chip" id="tracking-refresh-chip">
                                 <i class="lucide-refresh-cw"></i>
                                 <span id="tracking-last-refresh">—</span>
                             </div>
                         </div>
-
-                        <!-- Drivers panel -->
                         <div class="drivers-panel">
                             <div class="drivers-panel-header">
                                 <span id="drivers-count-label">Active trucks</span>
@@ -434,23 +366,19 @@
                             </div>
                         </div>
                     </div>
-
                 </section>
 
                 <!-- ══════════════ PAGE: NEARBY BINS ══════════════ -->
                 <section class="page-section" id="page-bins">
-
                     <div class="page-header">
                         <div>
                             <h2>Nearby Bins</h2>
                             <p class="page-sub">Smart waste bins within 1 km of your location</p>
                         </div>
                         <button class="btn btn-primary" id="locate-btn" type="button">
-                            <i class="lucide-locate"></i>
-                            Use my location
+                            <i class="lucide-locate"></i> Use my location
                         </button>
                     </div>
-
                     <div class="map-layout">
                         <div id="bins-map" class="bins-map"></div>
                         <div class="bins-list-panel">
@@ -463,29 +391,652 @@
                             </div>
                         </div>
                     </div>
-
                 </section>
 
                 <!-- ══════════════ PAGE: NOTIFICATIONS ══════════════ -->
                 <section class="page-section" id="page-notifications">
-
                     <div class="page-header">
                         <div>
                             <h2>Notifications</h2>
                             <p class="page-sub">Updates from Lusaka City Council</p>
                         </div>
                         <button class="btn btn-secondary" id="mark-all-read-btn" type="button">
-                            <i class="lucide-check-check"></i>
-                            Mark all read
+                            <i class="lucide-check-check"></i> Mark all read
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body" id="notifications-list">
+                            <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading…</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════ PAGE: TRACK REQUESTS ══════════════ -->
+                <section class="page-section" id="page-my-requests">
+                    <div class="page-header">
+                        <div>
+                            <h2>Track Requests</h2>
+                            <p class="page-sub">Monitor your pickup request status in real time</p>
+                        </div>
+                        <button class="btn btn-primary" id="new-pickup-req-btn" type="button">
+                            <i class="lucide-plus"></i> New request
+                        </button>
+                    </div>
+                    <div class="stats-strip">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--blue"><i class="lucide-list-checks"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="req-stat-total">—</span><span class="stat-label">Total</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--amber"><i class="lucide-clock"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="req-stat-pending">—</span><span class="stat-label">Pending</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--green"><i class="lucide-calendar-check"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="req-stat-confirmed">—</span><span class="stat-label">Confirmed</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--purple"><i class="lucide-check-check"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="req-stat-completed">—</span><span class="stat-label">Completed</span></div>
+                        </div>
+                    </div>
+                    <div class="filter-tabs" id="req-filter-tabs">
+                        <button class="filter-tab active" data-req-filter="all">All</button>
+                        <button class="filter-tab" data-req-filter="pending">Pending</button>
+                        <button class="filter-tab" data-req-filter="confirmed">Confirmed</button>
+                        <button class="filter-tab" data-req-filter="completed">Completed</button>
+                        <button class="filter-tab" data-req-filter="cancelled">Cancelled</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body" id="requests-timeline-list">
+                            <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading requests…</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════ PAGE: ANALYTICS ══════════════ -->
+                <section class="page-section" id="page-analytics">
+                    <div class="page-header">
+                        <div>
+                            <h2>Analytics</h2>
+                            <p class="page-sub">Your waste management activity and environmental impact</p>
+                        </div>
+                        <select class="form-select" id="analytics-period" style="width:auto">
+                            <option value="3">Last 3 months</option>
+                            <option value="6" selected>Last 6 months</option>
+                            <option value="12">Last 12 months</option>
+                        </select>
+                    </div>
+                    <div class="stats-strip">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--blue"><i class="lucide-flag"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="an-total-reports">—</span><span class="stat-label">Reports submitted</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--green"><i class="lucide-check-circle-2"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="an-resolved">—</span><span class="stat-label">Issues resolved</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--amber"><i class="lucide-leaf"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="an-points">—</span><span class="stat-label">Points earned</span></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon--purple"><i class="lucide-recycle"></i></div>
+                            <div class="stat-body"><span class="stat-value" id="an-pickups">—</span><span class="stat-label">Pickups done</span></div>
+                        </div>
+                    </div>
+                    <div class="analytics-grid">
+                        <div class="card">
+                            <div class="card-header"><h3><i class="lucide-trending-up"></i> Reports Over Time</h3></div>
+                            <div class="card-body chart-wrap"><canvas id="chart-reports-time"></canvas></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3><i class="lucide-pie-chart"></i> Status Breakdown</h3></div>
+                            <div class="card-body chart-wrap chart-wrap--donut"><canvas id="chart-status"></canvas></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3><i class="lucide-sparkles"></i> Points Earned</h3></div>
+                            <div class="card-body chart-wrap"><canvas id="chart-points"></canvas></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h3><i class="lucide-trophy"></i> Achievements</h3></div>
+                            <div class="card-body" id="achievements-grid"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════ PAGE: RECYCLING CENTERS ══════════════ -->
+                <section class="page-section" id="page-recycling-centers">
+                    <div class="page-header">
+                        <div>
+                            <h2>Recycling Centers</h2>
+                            <p class="page-sub">Find recycling drop-off points across Lusaka</p>
+                        </div>
+                        <button class="btn btn-secondary" id="recycle-locate-btn" type="button">
+                            <i class="lucide-locate"></i> Locate me
+                        </button>
+                    </div>
+                    <div class="map-layout">
+                        <div id="recycle-map" class="bins-map"></div>
+                        <div class="bins-list-panel">
+                            <div class="bins-list-header">Centers in Lusaka</div>
+                            <div id="recycle-list" class="bins-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════ PAGE: PAYMENT HISTORY ══════════════ -->
+                <section class="page-section" id="page-payment-history">
+                    <div class="page-header">
+                        <div>
+                            <h2>Payment History</h2>
+                            <p class="page-sub">Your subscription and billing records</p>
+                        </div>
+                        <button class="btn btn-primary" id="payment-upgrade-btn" type="button">
+                            <i class="lucide-zap"></i> Upgrade plan
+                        </button>
+                    </div>
+                    <div class="plan-status-card" id="plan-status-card">
+                        <div class="plan-status-left">
+                            <div class="plan-status-icon">♻️</div>
+                            <div>
+                                <div class="plan-status-name" id="plan-name">Basic Plan</div>
+                                <div class="plan-status-meta" id="plan-meta">Free forever · Active</div>
+                            </div>
+                        </div>
+                        <div class="plan-status-right">
+                            <span class="plan-badge" id="plan-badge">Active</span>
+                            <button class="btn btn-secondary btn-sm" id="plan-manage-btn" type="button">Manage</button>
+                        </div>
+                    </div>
+                    <h3 class="section-title" style="margin-top:1.5rem">Transaction History</h3>
+                    <div class="card">
+                        <div class="card-body" id="payment-history-list">
+                            <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading…</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════ PAGE: SUPPORT ══════════════ -->
+                <section class="page-section" id="page-support">
+                    <div class="page-header">
+                        <div>
+                            <h2>Help &amp; Support</h2>
+                            <p class="page-sub">Get help, browse FAQs, or submit a support ticket</p>
+                        </div>
+                    </div>
+                    <div class="sub-tabs" id="support-tabs">
+                        <button class="sub-tab active" data-tab-group="support" data-tab="chat" type="button">
+                            <i class="lucide-message-circle"></i> Live Chat
+                        </button>
+                        <button class="sub-tab" data-tab-group="support" data-tab="faq" type="button">
+                            <i class="lucide-help-circle"></i> FAQ
+                        </button>
+                        <button class="sub-tab" data-tab-group="support" data-tab="tickets" type="button">
+                            <i class="lucide-ticket"></i> My Tickets
+                        </button>
+                        <button class="sub-tab" data-tab-group="support" data-tab="report-issue" type="button">
+                            <i class="lucide-alert-circle"></i> Report Issue
                         </button>
                     </div>
 
-                    <div class="card">
-                        <div class="card-body" id="notifications-list">
-                            <div class="loading-state">
-                                <i class="lucide-loader-2"></i>
-                                <span>Loading…</span>
+                    <!-- Chat -->
+                    <div class="sub-tab-content active" id="support-tab-chat">
+                        <div class="chat-container">
+                            <div class="chat-messages" id="chat-messages">
+                                <div class="chat-msg bot">
+                                    <div class="chat-avatar bot-avatar">🤖</div>
+                                    <div class="chat-bubble">
+                                        <p>Welcome to SmartWaste Support! 👋 I'm here to help with waste collection, reports, and account issues.</p>
+                                        <div class="chat-suggestions">
+                                            <button class="chat-suggest-btn" data-msg="How do I submit a waste report?">How to report waste?</button>
+                                            <button class="chat-suggest-btn" data-msg="When is my next collection?">Next collection?</button>
+                                            <button class="chat-suggest-btn" data-msg="How do green points work?">Green points?</button>
+                                            <button class="chat-suggest-btn" data-msg="I need help with my subscription">Subscription help</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                            <div class="chat-input-bar">
+                                <input type="text" id="chat-input" placeholder="Type your message…" autocomplete="off">
+                                <button class="chat-send-btn" id="chat-send-btn" type="button">
+                                    <i class="lucide-send"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ -->
+                    <div class="sub-tab-content" id="support-tab-faq">
+                        <div class="faq-list">
+                            <details class="faq-item">
+                                <summary class="faq-question">How do I submit a waste report?</summary>
+                                <div class="faq-answer">Click <strong>Report Waste</strong> in the sidebar or the <strong>Report issue</strong> button at the top. Select a category, describe the problem, and add your location. You earn <strong>10 green points</strong> for each verified report!</div>
+                            </details>
+                            <details class="faq-item">
+                                <summary class="faq-question">How do green points work?</summary>
+                                <div class="faq-answer">You earn 10 green points for every verified waste report. Accumulate points and redeem them in <strong>Recycling Rewards</strong> for bus passes, eco bags, recycling bins, and community garden vouchers.</div>
+                            </details>
+                            <details class="faq-item">
+                                <summary class="faq-question">How do I request a custom pickup?</summary>
+                                <div class="faq-answer">Go to <strong>Schedule Pickup</strong> in the sidebar, then click any future date on the calendar or press <strong>Request pickup</strong>. Choose your preferred date, time slot, and any special instructions. You'll receive a notification when it's confirmed.</div>
+                            </details>
+                            <details class="faq-item">
+                                <summary class="faq-question">What are the collection times for my zone?</summary>
+                                <div class="faq-answer">Check <strong>Schedule Pickup</strong> to see your zone's regular collection days. Kabulonga: Mon/Wed/Fri. Northmead: Tue/Thu/Sat. Kanyama: Mon/Wed/Fri. Matero: Tue/Thu. Chelston: Mon/Thu/Sat. Times may vary on public holidays.</div>
+                            </details>
+                            <details class="faq-item">
+                                <summary class="faq-question">How do I track the collection truck in real time?</summary>
+                                <div class="faq-answer">Navigate to <strong>Realtime Tracking</strong> in the Collection section. The live map shows truck positions, estimated arrival time, and current speed. It auto-refreshes every 10 seconds.</div>
+                            </details>
+                            <details class="faq-item">
+                                <summary class="faq-question">How do I upgrade my subscription?</summary>
+                                <div class="faq-answer">Go to <strong>Settings → Subscription</strong> or <strong>Payment History → Upgrade plan</strong>. Choose Standard (ZMW 50/month) or Premium (ZMW 150/month) and pay via Airtel Money or Zanaco Bank.</div>
+                            </details>
+                            <details class="faq-item">
+                                <summary class="faq-question">What if the collection truck doesn't arrive?</summary>
+                                <div class="faq-answer">Confirm your collection day in <strong>Schedule Pickup</strong>. If missed, submit a <strong>Missed collection</strong> report via <strong>Report Waste</strong>. You can also raise a support ticket on this page.</div>
+                            </details>
+                            <details class="faq-item">
+                                <summary class="faq-question">How do I contact Lusaka City Council directly?</summary>
+                                <div class="faq-answer">Call <strong>+260 211 123 456</strong> or email <strong>info@lcc.zm</strong>. Office hours: Mon–Fri 08:00–17:00. 24-hour emergency hotline: <strong>+260 211 987 654</strong>.</div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <!-- Tickets -->
+                    <div class="sub-tab-content" id="support-tab-tickets">
+                        <div class="tickets-header">
+                            <h3>My Support Tickets</h3>
+                            <button class="btn btn-primary" id="create-ticket-btn" type="button">
+                                <i class="lucide-plus"></i> New ticket
+                            </button>
+                        </div>
+                        <div id="tickets-list">
+                            <div class="loading-state"><i class="lucide-loader-2"></i><span>Loading tickets…</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Report Issue -->
+                    <div class="sub-tab-content" id="support-tab-report-issue">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 style="margin-bottom:1.2rem">Report an issue with SmartWaste</h3>
+                                <div class="form-group">
+                                    <label class="form-label">Issue category</label>
+                                    <select class="form-select" id="support-issue-category">
+                                        <option value="">Select category…</option>
+                                        <option value="app_bug">App bug / error</option>
+                                        <option value="collection_problem">Collection problem</option>
+                                        <option value="account_issue">Account issue</option>
+                                        <option value="payment_problem">Payment problem</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Subject</label>
+                                    <input class="form-input" id="support-issue-subject" type="text" placeholder="Brief description of the issue">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-textarea" id="support-issue-description" rows="5" placeholder="What happened, when, and what you expected…"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Priority</label>
+                                    <select class="form-select" id="support-issue-priority">
+                                        <option value="low">Low — general inquiry</option>
+                                        <option value="medium" selected>Medium — affects my experience</option>
+                                        <option value="high">High — urgent / blocking</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" id="submit-support-issue" type="button">
+                                    <i class="lucide-send"></i> Submit issue
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ══════════════ PAGE: SETTINGS ══════════════ -->
+                <section class="page-section" id="page-settings">
+                    <div class="page-header">
+                        <div>
+                            <h2>Settings</h2>
+                            <p class="page-sub">Manage your profile, subscription, and preferences</p>
+                        </div>
+                    </div>
+                    <div class="sub-tabs" id="settings-tabs">
+                        <button class="sub-tab active" data-tab-group="settings" data-tab="profile" type="button">
+                            <i class="lucide-user"></i> Profile
+                        </button>
+                        <button class="sub-tab" data-tab-group="settings" data-tab="subscription" type="button">
+                            <i class="lucide-zap"></i> Subscription
+                        </button>
+                        <button class="sub-tab" data-tab-group="settings" data-tab="appearance" type="button">
+                            <i class="lucide-palette"></i> Appearance
+                        </button>
+                        <button class="sub-tab" data-tab-group="settings" data-tab="notif-prefs" type="button">
+                            <i class="lucide-bell"></i> Notifications
+                        </button>
+                        <button class="sub-tab" data-tab-group="settings" data-tab="security" type="button">
+                            <i class="lucide-shield"></i> Security
+                        </button>
+                    </div>
+
+                    <!-- Profile tab -->
+                    <div class="sub-tab-content active" id="settings-tab-profile">
+                        <div class="settings-card">
+                            <div class="profile-header-row">
+                                <div class="profile-avatar-wrap">
+                                    <div class="profile-avatar-lg" id="profile-avatar-lg">JD</div>
+                                    <button class="avatar-edit-btn" type="button" title="Change photo"><i class="lucide-camera"></i></button>
+                                </div>
+                                <div>
+                                    <div class="profile-display-name" id="profile-display-name">Loading…</div>
+                                    <div class="profile-display-email" id="profile-display-email">—</div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">First name</label>
+                                    <input class="form-input" id="profile-first-name" type="text" placeholder="First name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Last name</label>
+                                    <input class="form-input" id="profile-last-name" type="text" placeholder="Last name">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input class="form-input" id="profile-email" type="email" placeholder="you@example.com">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Phone number</label>
+                                    <input class="form-input" id="profile-phone" type="tel" placeholder="+260 97X XXX XXX">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Compound / Area</label>
+                                    <select class="form-select" id="profile-compound">
+                                        <option value="Kabulonga">Kabulonga</option>
+                                        <option value="Northmead">Northmead</option>
+                                        <option value="Kanyama">Kanyama</option>
+                                        <option value="Matero">Matero</option>
+                                        <option value="Chelston">Chelston</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Street address</label>
+                                    <input class="form-input" id="profile-address" type="text" placeholder="House/plot number, street name">
+                                </div>
+                            </div>
+                            <h4 class="settings-sub-heading">Pickup Preferences</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Preferred time slot</label>
+                                    <select class="form-select" id="profile-pickup-pref">
+                                        <option value="morning">Morning (7 am – 12 pm)</option>
+                                        <option value="afternoon">Afternoon (12 pm – 5 pm)</option>
+                                        <option value="evening">Evening (5 pm – 8 pm)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Waste type focus</label>
+                                    <select class="form-select" id="profile-waste-pref">
+                                        <option value="general">General waste</option>
+                                        <option value="recycling">Recycling only</option>
+                                        <option value="both">Both general &amp; recycling</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="settings-save-bar">
+                                <button class="btn btn-primary" id="save-profile-btn" type="button">
+                                    <i class="lucide-save"></i> Save changes
+                                </button>
+                                <span class="save-status" id="profile-save-status"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscription tab -->
+                    <div class="sub-tab-content" id="settings-tab-subscription">
+                        <div class="plans-grid">
+                            <div class="plan-card" id="plan-card-basic">
+                                <div class="plan-card-top">
+                                    <div class="plan-emoji">♻️</div>
+                                    <div class="plan-tag current">Current Plan</div>
+                                </div>
+                                <div class="plan-name">Basic</div>
+                                <div class="plan-price">Free <span class="plan-period">/ month</span></div>
+                                <ul class="plan-features">
+                                    <li class="feat-yes"><i class="lucide-check"></i> 3 waste reports / month</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> 2 pickup requests / month</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Email notifications</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Nearby bins map</li>
+                                    <li class="feat-no"><i class="lucide-x"></i> Real-time tracking</li>
+                                    <li class="feat-no"><i class="lucide-x"></i> Analytics dashboard</li>
+                                    <li class="feat-no"><i class="lucide-x"></i> Priority support</li>
+                                </ul>
+                                <button class="btn btn-secondary" disabled type="button">Current plan</button>
+                            </div>
+                            <div class="plan-card plan-featured" id="plan-card-standard">
+                                <div class="plan-card-top">
+                                    <div class="plan-emoji">⭐</div>
+                                    <div class="plan-tag popular">Most Popular</div>
+                                </div>
+                                <div class="plan-name">Standard</div>
+                                <div class="plan-price">ZMW 50 <span class="plan-period">/ month</span></div>
+                                <ul class="plan-features">
+                                    <li class="feat-yes"><i class="lucide-check"></i> Unlimited waste reports</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> 10 pickup requests / month</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Push + email notifications</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Real-time truck tracking</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Analytics dashboard</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Priority support</li>
+                                    <li class="feat-no"><i class="lucide-x"></i> SMS alerts</li>
+                                </ul>
+                                <button class="btn btn-primary plan-upgrade-btn" data-plan="Standard" data-price="50" type="button">
+                                    <i class="lucide-zap"></i> Upgrade to Standard
+                                </button>
+                            </div>
+                            <div class="plan-card" id="plan-card-premium">
+                                <div class="plan-card-top">
+                                    <div class="plan-emoji">💎</div>
+                                    <div class="plan-tag">&nbsp;</div>
+                                </div>
+                                <div class="plan-name">Premium</div>
+                                <div class="plan-price">ZMW 150 <span class="plan-period">/ month</span></div>
+                                <ul class="plan-features">
+                                    <li class="feat-yes"><i class="lucide-check"></i> Everything in Standard</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Unlimited pickup requests</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> SMS alerts</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> 2× green points multiplier</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Dedicated support agent</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Early access features</li>
+                                    <li class="feat-yes"><i class="lucide-check"></i> Monthly impact report</li>
+                                </ul>
+                                <button class="btn btn-outline plan-upgrade-btn" data-plan="Premium" data-price="150" type="button">
+                                    <i class="lucide-diamond"></i> Upgrade to Premium
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appearance tab -->
+                    <div class="sub-tab-content" id="settings-tab-appearance">
+                        <div class="settings-card">
+                            <h3 class="settings-card-title">Theme</h3>
+                            <div class="theme-options">
+                                <button class="theme-opt active" data-theme-opt="dark" id="theme-opt-dark" type="button">
+                                    <span class="theme-opt-icon">🌙</span>
+                                    <span class="theme-opt-label">Dark</span>
+                                </button>
+                                <button class="theme-opt" data-theme-opt="light" id="theme-opt-light" type="button">
+                                    <span class="theme-opt-icon">☀️</span>
+                                    <span class="theme-opt-label">Light</span>
+                                </button>
+                                <button class="theme-opt" data-theme-opt="system" id="theme-opt-system" type="button">
+                                    <span class="theme-opt-icon">💻</span>
+                                    <span class="theme-opt-label">System</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="settings-card" style="margin-top:14px">
+                            <h3 class="settings-card-title">Text size</h3>
+                            <div class="font-size-options">
+                                <button class="font-sz-opt" data-font-size="13" type="button">Small</button>
+                                <button class="font-sz-opt active" data-font-size="14" type="button">Normal</button>
+                                <button class="font-sz-opt" data-font-size="16" type="button">Large</button>
+                                <button class="font-sz-opt" data-font-size="18" type="button">X-Large</button>
+                            </div>
+                        </div>
+                        <div class="settings-card" style="margin-top:14px">
+                            <h3 class="settings-card-title">Accessibility</h3>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">High contrast</div>
+                                    <div class="toggle-desc">Increases border and text contrast for readability</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="pref-high-contrast">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">Reduce motion</div>
+                                    <div class="toggle-desc">Disables animations and transitions</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="pref-reduce-motion">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications settings tab -->
+                    <div class="sub-tab-content" id="settings-tab-notif-prefs">
+                        <div class="settings-card">
+                            <h3 class="settings-card-title">Notification channels</h3>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">Email notifications</div>
+                                    <div class="toggle-desc">Receive updates via email</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-email" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">Push notifications</div>
+                                    <div class="toggle-desc">Browser push alerts (requires permission)</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-push" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">SMS alerts <span class="premium-tag">Premium</span></div>
+                                    <div class="toggle-desc">Get SMS for collections and report updates</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-sms" disabled>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="settings-card" style="margin-top:14px">
+                            <h3 class="settings-card-title">Notification types</h3>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">Collection reminders</div>
+                                    <div class="toggle-desc">24 h before your scheduled collection</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-collection" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">Report status updates</div>
+                                    <div class="toggle-desc">When your reports are actioned or resolved</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-reports" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">Rewards notifications</div>
+                                    <div class="toggle-desc">Points earned and redemption confirmations</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-rewards" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="toggle-info">
+                                    <div class="toggle-label">Community alerts</div>
+                                    <div class="toggle-desc">Zone-wide announcements from LCC</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="notif-community">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security tab -->
+                    <div class="sub-tab-content" id="settings-tab-security">
+                        <div class="settings-card">
+                            <h3 class="settings-card-title">Change password</h3>
+                            <div class="form-group">
+                                <label class="form-label">Current password</label>
+                                <div class="input-pwd-wrap">
+                                    <input class="form-input" id="sec-current-pwd" type="password" placeholder="Current password" autocomplete="current-password">
+                                    <button class="pwd-toggle-btn" type="button" data-target="sec-current-pwd"><i class="lucide-eye"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">New password</label>
+                                    <div class="input-pwd-wrap">
+                                        <input class="form-input" id="sec-new-pwd" type="password" placeholder="Min. 8 characters" autocomplete="new-password">
+                                        <button class="pwd-toggle-btn" type="button" data-target="sec-new-pwd"><i class="lucide-eye"></i></button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Confirm new password</label>
+                                    <div class="input-pwd-wrap">
+                                        <input class="form-input" id="sec-confirm-pwd" type="password" placeholder="Repeat new password" autocomplete="new-password">
+                                        <button class="pwd-toggle-btn" type="button" data-target="sec-confirm-pwd"><i class="lucide-eye"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pwd-strength-bar"><div class="pwd-strength-fill" id="pwd-strength-fill"></div></div>
+                            <div class="pwd-strength-label" id="pwd-strength-label"></div>
+                            <button class="btn btn-primary" id="save-password-btn" type="button">
+                                <i class="lucide-lock"></i> Update password
+                            </button>
+                        </div>
+                        <div class="settings-card danger-zone" style="margin-top:14px">
+                            <h3 class="settings-card-title danger-title">Danger zone</h3>
+                            <p class="settings-card-desc">These actions are irreversible. Proceed with caution.</p>
+                            <button class="btn btn-outline-danger" id="delete-account-btn" type="button">
+                                <i class="lucide-trash-2"></i> Delete my account
+                            </button>
                         </div>
                     </div>
 
@@ -501,9 +1052,7 @@
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
             <div class="modal-header">
                 <h3 id="modal-title">Submit a report</h3>
-                <button class="modal-close" id="close-report-modal" aria-label="Close" type="button">
-                    <i class="lucide-x"></i>
-                </button>
+                <button class="modal-close" id="close-report-modal" aria-label="Close" type="button"><i class="lucide-x"></i></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -520,8 +1069,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="report-description">Description</label>
-                    <textarea class="form-textarea" id="report-description" rows="4"
-                        placeholder="Describe the issue in detail…"></textarea>
+                    <textarea class="form-textarea" id="report-description" rows="4" placeholder="Describe the issue in detail…"></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="report-address">Address / landmark</label>
@@ -538,8 +1086,7 @@
                     </div>
                 </div>
                 <button class="geo-btn" id="autofill-location" type="button">
-                    <i class="lucide-crosshair"></i>
-                    Use my current location
+                    <i class="lucide-crosshair"></i> Use my current location
                 </button>
                 <div class="modal-note">
                     <i class="lucide-leaf"></i>
@@ -549,8 +1096,7 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancel-report-modal" type="button">Cancel</button>
                 <button class="btn btn-primary" id="submit-report-form" type="button">
-                    <i class="lucide-send"></i>
-                    Submit report
+                    <i class="lucide-send"></i> Submit report
                 </button>
             </div>
         </div>
@@ -560,13 +1106,8 @@
     <div class="modal-backdrop" id="pickup-modal" aria-hidden="true">
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pickup-modal-title">
             <div class="modal-header">
-                <h3 id="pickup-modal-title">
-                    <i class="lucide-calendar-plus"></i>
-                    Request a custom pickup
-                </h3>
-                <button class="modal-close" id="close-pickup-modal" aria-label="Close" type="button">
-                    <i class="lucide-x"></i>
-                </button>
+                <h3 id="pickup-modal-title"><i class="lucide-calendar-plus"></i> Request a custom pickup</h3>
+                <button class="modal-close" id="close-pickup-modal" aria-label="Close" type="button"><i class="lucide-x"></i></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -583,8 +1124,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="pickup-description">Instructions (optional)</label>
-                    <textarea class="form-textarea" id="pickup-description" rows="3"
-                        placeholder="e.g. Large items, garden waste, extra bags…"></textarea>
+                    <textarea class="form-textarea" id="pickup-description" rows="3" placeholder="e.g. Large items, garden waste, extra bags…"></textarea>
                 </div>
                 <div class="modal-note">
                     <i class="lucide-info"></i>
@@ -594,8 +1134,107 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancel-pickup-modal" type="button">Cancel</button>
                 <button class="btn btn-primary" id="submit-pickup-form" type="button">
-                    <i class="lucide-send"></i>
-                    Submit request
+                    <i class="lucide-send"></i> Submit request
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ MODAL: Payment ═══════════════════════ -->
+    <div class="modal-backdrop" id="payment-modal" aria-hidden="true">
+        <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+            <div class="modal-header">
+                <h3 id="payment-modal-title"><i class="lucide-credit-card"></i> Subscribe to <span id="payment-plan-name">Standard</span></h3>
+                <button class="modal-close" id="close-payment-modal" aria-label="Close" type="button"><i class="lucide-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-amount-banner">
+                    <span>Total due today</span>
+                    <strong id="payment-amount">ZMW 50</strong>
+                    <span class="pay-recurrence">/ month · cancel anytime</span>
+                </div>
+                <div class="payment-method-tabs">
+                    <button class="pay-method-tab active" data-pay-method="airtel" type="button">
+                        <span class="airtel-badge">Airtel Money</span>
+                    </button>
+                    <button class="pay-method-tab" data-pay-method="zanaco" type="button">
+                        <span class="zanaco-badge">Zanaco Bank</span>
+                    </button>
+                </div>
+                <!-- Airtel Money -->
+                <div class="pay-panel active" id="pay-panel-airtel">
+                    <p class="pay-instructions">Enter your Airtel Money number. You'll receive a USSD prompt on your phone to confirm payment.</p>
+                    <div class="form-group">
+                        <label class="form-label">Airtel Money phone number</label>
+                        <div class="input-prefix-wrap">
+                            <span class="input-prefix">+260</span>
+                            <input class="form-input" id="airtel-phone" type="tel" placeholder="97X XXX XXX" maxlength="12">
+                        </div>
+                    </div>
+                    <div class="pay-steps">
+                        <div class="pay-step"><span class="pay-step-num">1</span> Enter your Airtel number above</div>
+                        <div class="pay-step"><span class="pay-step-num">2</span> Click "Pay now" — USSD prompt sent to your phone</div>
+                        <div class="pay-step"><span class="pay-step-num">3</span> Dial *115# and approve the payment</div>
+                    </div>
+                </div>
+                <!-- Zanaco Bank -->
+                <div class="pay-panel" id="pay-panel-zanaco">
+                    <p class="pay-instructions">Transfer to the account below and use your email as the payment reference.</p>
+                    <div class="zanaco-details">
+                        <div class="zanaco-row"><span>Bank</span><strong>Zanaco Bank Plc</strong></div>
+                        <div class="zanaco-row"><span>Account name</span><strong>Lusaka City Council — SmartWaste</strong></div>
+                        <div class="zanaco-row"><span>Account number</span><strong>0123456789</strong></div>
+                        <div class="zanaco-row"><span>Branch</span><strong>Cairo Road, Lusaka</strong></div>
+                        <div class="zanaco-row"><span>Reference</span><strong id="zanaco-ref">your-email@example.com</strong></div>
+                    </div>
+                    <div class="form-group" style="margin-top:14px">
+                        <label class="form-label">Confirm your transfer reference</label>
+                        <input class="form-input" id="zanaco-confirm-ref" type="text" placeholder="Enter the reference you used">
+                    </div>
+                </div>
+                <div class="pay-status-msg" id="pay-status-msg" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-payment-modal" type="button">Cancel</button>
+                <button class="btn btn-primary" id="submit-payment-btn" type="button">
+                    <i class="lucide-credit-card"></i> <span id="pay-btn-label">Pay now</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════ MODAL: New Ticket ═══════════════════════ -->
+    <div class="modal-backdrop" id="ticket-modal" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
+            <div class="modal-header">
+                <h3 id="ticket-modal-title"><i class="lucide-ticket"></i> New Support Ticket</h3>
+                <button class="modal-close" id="close-ticket-modal" aria-label="Close" type="button"><i class="lucide-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="ticket-category">
+                        <option value="">Select category…</option>
+                        <option value="collection">Collection issue</option>
+                        <option value="account">Account help</option>
+                        <option value="billing">Billing / subscription</option>
+                        <option value="app">App technical issue</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    <input class="form-input" id="ticket-subject" type="text" placeholder="Brief summary of your issue">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Details</label>
+                    <textarea class="form-textarea" id="ticket-details" rows="4" placeholder="Describe your issue in detail…"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-ticket-modal" type="button">Cancel</button>
+                <button class="btn btn-primary" id="submit-ticket-btn" type="button">
+                    <i class="lucide-send"></i> Submit ticket
                 </button>
             </div>
         </div>
@@ -604,7 +1243,6 @@
     <!-- Toast -->
     <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
-    <!-- Lucide icon initializer -->
     <script>
     (function() {
         document.querySelectorAll('[class*="lucide-"]').forEach(el => {
@@ -615,7 +1253,6 @@
     })();
     </script>
 
-    <!-- Firebase JS SDK (compat) — required for FCM browser push -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 

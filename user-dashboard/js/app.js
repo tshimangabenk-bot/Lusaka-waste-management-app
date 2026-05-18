@@ -1299,3 +1299,690 @@ navigateTo = function(page) {
     }
     _origNavigateTo(page);
 };
+
+
+/* ============================================================================
+   THEME SYSTEM
+   ============================================================================ */
+let _currentThemePref = localStorage.getItem('sw_theme') || 'dark';
+let _currentFontSize  = parseInt(localStorage.getItem('sw_font_size') || '14', 10);
+
+function applyTheme(pref) {
+    _currentThemePref = pref;
+    localStorage.setItem('sw_theme', pref);
+    let resolved = pref;
+    if (pref === 'system') {
+        resolved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    document.documentElement.setAttribute('data-theme', resolved);
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) {
+        btn.innerHTML = resolved === 'light'
+            ? '<i class="lucide-moon"></i>'
+            : '<i class="lucide-sun"></i>';
+        lucide.createIcons();
+    }
+    document.querySelectorAll('.theme-opt').forEach(el => {
+        el.classList.toggle('active', el.dataset.themeOpt === pref);
+    });
+}
+
+function applyFontSize(px) {
+    _currentFontSize = px;
+    localStorage.setItem('sw_font_size', px);
+    document.documentElement.style.fontSize = px + 'px';
+    document.querySelectorAll('.font-sz-opt').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.fontSize, 10) === px);
+    });
+}
+
+// Boot — apply saved prefs
+applyTheme(_currentThemePref);
+applyFontSize(_currentFontSize);
+if (localStorage.getItem('sw_high_contrast') === 'true') document.documentElement.setAttribute('data-high-contrast', 'true');
+if (localStorage.getItem('sw_reduce_motion') === 'true')  document.documentElement.setAttribute('data-reduce-motion', 'true');
+
+// Header toggle button
+document.getElementById('theme-toggle-btn').addEventListener('click', () => {
+    applyTheme(_currentThemePref === 'dark' ? 'light' : 'dark');
+});
+
+// System theme change listener
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+    if (_currentThemePref === 'system') applyTheme('system');
+});
+
+
+/* ============================================================================
+   SETUP NAV — handle data-action items + sub-tabs
+   ============================================================================ */
+(function patchSetupNav() {
+    // Action items (Report Waste) — don't navigate, just trigger action
+    document.querySelectorAll('[data-action]').forEach(el => {
+        el.addEventListener('click', () => {
+            if (el.dataset.action === 'open-report') {
+                const m = document.getElementById('report-modal');
+                m.classList.add('open'); m.removeAttribute('aria-hidden');
+            }
+        });
+    });
+
+    // Sub-tabs for Support and Settings pages
+    document.querySelectorAll('.sub-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            const group = tab.dataset.tabGroup;
+            const target = tab.dataset.tab;
+            document.querySelectorAll(`.sub-tab[data-tab-group="${group}"]`).forEach(t => t.classList.remove('active'));
+            document.querySelectorAll(`[id^="support-tab-"], [id^="settings-tab-"]`).forEach(c => {
+                if (c.closest(`#page-${group}`) || c.id.startsWith(`${group === 'settings' ? 'settings' : 'support'}-tab-`)) {
+                    c.classList.remove('active');
+                }
+            });
+            tab.classList.add('active');
+            const panel = document.getElementById(`${group === 'support' ? 'support' : 'settings'}-tab-${target}`);
+            if (panel) panel.classList.add('active');
+            lucide.createIcons();
+        });
+    });
+})();
+
+// Extend navigateTo titles
+const _extTitles = {
+    'my-requests':       'Track Requests',
+    analytics:           'Analytics',
+    'recycling-centers': 'Recycling Centers',
+    'payment-history':   'Payment History',
+    support:             'Help & Support',
+    settings:            'Settings',
+};
+
+// Patch the original navigateTo to handle new pages
+const _orig2NavigateTo = navigateTo;
+navigateTo = function(page) {
+    _orig2NavigateTo(page);
+    // Update title for new pages
+    if (_extTitles[page]) {
+        document.getElementById('topbar-title').textContent = _extTitles[page];
+    }
+    // Load new pages
+    if (page === 'my-requests')       loadMyRequestsPage();
+    if (page === 'analytics')         loadAnalyticsPage();
+    if (page === 'recycling-centers') loadRecyclingCentersPage();
+    if (page === 'payment-history')   loadPaymentHistoryPage();
+    if (page === 'support')           initSupportPage();
+    if (page === 'settings')          initSettingsPage();
+};
+
+// Also wire the new-pickup-req-btn on the Track Requests page
+document.getElementById('new-pickup-req-btn').addEventListener('click', openPickupModal);
+// And the payment upgrade button on Payment History
+document.getElementById('payment-upgrade-btn').addEventListener('click', () => navigateTo('settings'));
+document.getElementById('plan-manage-btn').addEventListener('click', () => navigateTo('settings'));
+
+
+/* ============================================================================
+   TRACK REQUESTS PAGE
+   ============================================================================ */
+let _reqFilter = 'all';
+
+async function loadMyRequestsPage() {
+    let reqs = schedState.requests;
+    if (!reqs || !reqs.length) {
+        try { reqs = await apiGetMyRequests(); schedState.requests = reqs; }
+        catch { reqs = getDemoRequests(); schedState.requests = reqs; }
+    }
+    // Stats
+    const total     = reqs.length;
+    const pending   = reqs.filter(r => r.status === 'pending').length;
+    const confirmed = reqs.filter(r => r.status === 'confirmed').length;
+    const completed = reqs.filter(r => r.status === 'completed').length;
+    document.getElementById('req-stat-total').textContent     = total;
+    document.getElementById('req-stat-pending').textContent   = pending;
+    document.getElementById('req-stat-confirmed').textContent = confirmed;
+    document.getElementById('req-stat-completed').textContent = completed;
+
+    // Update badge
+    const badgeEl = document.getElementById('badge-requests');
+    if (pending > 0) { badgeEl.textContent = pending; badgeEl.style.display = ''; }
+    else { badgeEl.style.display = 'none'; }
+
+    renderRequestsTimeline(reqs, _reqFilter);
+
+    // Wire filter tabs
+    document.querySelectorAll('[data-req-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            _reqFilter = btn.dataset.reqFilter;
+            document.querySelectorAll('[data-req-filter]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderRequestsTimeline(schedState.requests, _reqFilter);
+        });
+    });
+}
+
+function renderRequestsTimeline(reqs, filter) {
+    const filtered = filter === 'all' ? reqs : reqs.filter(r => r.status === filter);
+    const el = document.getElementById('requests-timeline-list');
+    if (!filtered.length) {
+        el.innerHTML = `<div class="empty-state"><i class="lucide-calendar-x"></i><p>No ${filter === 'all' ? '' : filter} requests found.</p></div>`;
+        lucide.createIcons(); return;
+    }
+    el.innerHTML = filtered.map(r => {
+        const canCancel = ['pending', 'confirmed'].includes(r.status);
+        return `<div class="req-timeline-item">
+            <div class="req-tl-dot ${r.status}"></div>
+            <div class="req-tl-body">
+                <div class="req-tl-date">${formatDate(r.requested_date)}</div>
+                <div class="req-tl-meta">${r.time_label || r.time_preference} · ${r.status}</div>
+                ${r.description ? `<div class="req-tl-desc">${escHtml(r.description)}</div>` : ''}
+                ${canCancel ? `<button class="req-tl-cancel" onclick="handleCancelRequest('${r.id}')">Cancel request</button>` : ''}
+            </div>
+            <span class="req-tl-status ${r.status}">${r.status}</span>
+        </div>`;
+    }).join('');
+    lucide.createIcons();
+}
+
+
+/* ============================================================================
+   ANALYTICS PAGE
+   ============================================================================ */
+let _analyticsCharts = {};
+
+async function loadAnalyticsPage() {
+    // Demo data (use real API data when available)
+    const months6 = getLast6Months();
+    const reportCounts  = [2, 3, 1, 4, 2, 3];
+    const pointsCounts  = [20, 30, 10, 40, 20, 30];
+    const totalReports  = reportCounts.reduce((a, b) => a + b, 0);
+    const resolved      = 9;
+    const totalPoints   = pointsCounts.reduce((a, b) => a + b, 0);
+    const pickups       = 4;
+
+    document.getElementById('an-total-reports').textContent = totalReports;
+    document.getElementById('an-resolved').textContent      = resolved;
+    document.getElementById('an-points').textContent        = totalPoints;
+    document.getElementById('an-pickups').textContent       = pickups;
+
+    const chartDefaults = {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#94a3b8', font: { family: 'Inter', size: 11 } } } },
+        scales: {},
+    };
+    const gridColor = 'rgba(255,255,255,0.05)';
+    const axisColor = '#64748b';
+
+    // Chart 1: Reports over time (bar)
+    destroyChart('chart-reports-time');
+    _analyticsCharts['chart-reports-time'] = new Chart(
+        document.getElementById('chart-reports-time').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: months6,
+            datasets: [{ label: 'Reports', data: reportCounts, backgroundColor: 'rgba(16,185,129,0.5)', borderColor: '#10b981', borderWidth: 1.5, borderRadius: 4 }]
+        },
+        options: { ...chartDefaults, scales: { x: { ticks: { color: axisColor }, grid: { color: gridColor } }, y: { ticks: { color: axisColor, stepSize: 1 }, grid: { color: gridColor } } } }
+    });
+
+    // Chart 2: Status breakdown (doughnut)
+    destroyChart('chart-status');
+    _analyticsCharts['chart-status'] = new Chart(
+        document.getElementById('chart-status').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Resolved', 'In Progress', 'Pending'],
+            datasets: [{ data: [resolved, 2, 4], backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'], borderWidth: 0 }]
+        },
+        options: { ...chartDefaults, cutout: '65%' }
+    });
+
+    // Chart 3: Points earned (line)
+    destroyChart('chart-points');
+    _analyticsCharts['chart-points'] = new Chart(
+        document.getElementById('chart-points').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: months6,
+            datasets: [{ label: 'Points', data: pointsCounts, borderColor: '#06d6a0', backgroundColor: 'rgba(6,214,160,0.1)', fill: true, tension: 0.4, pointRadius: 4 }]
+        },
+        options: { ...chartDefaults, scales: { x: { ticks: { color: axisColor }, grid: { color: gridColor } }, y: { ticks: { color: axisColor }, grid: { color: gridColor } } } }
+    });
+
+    // Achievements
+    renderAchievements(totalReports, totalPoints, resolved);
+}
+
+function destroyChart(id) {
+    if (_analyticsCharts[id]) { _analyticsCharts[id].destroy(); delete _analyticsCharts[id]; }
+}
+
+function getLast6Months() {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const result = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        result.push(months[d.getMonth()]);
+    }
+    return result;
+}
+
+function renderAchievements(reports, points, resolved) {
+    const defs = [
+        { id: 'first', emoji: '🌱', name: 'First Report',   desc: 'Submit your first report',          unlocked: reports >= 1 },
+        { id: 'five',  emoji: '🏆', name: 'Reporter Pro',   desc: 'Submit 5 waste reports',             unlocked: reports >= 5 },
+        { id: 'ten',   emoji: '🚀', name: 'Eco Champion',   desc: 'Submit 10 waste reports',            unlocked: reports >= 10 },
+        { id: 'pts',   emoji: '⭐', name: '100 Points',     desc: 'Earn 100 green points',              unlocked: points >= 100 },
+        { id: 'res',   emoji: '✅', name: 'Problem Solver', desc: 'Have 3 reports resolved',            unlocked: resolved >= 3 },
+        { id: 'eco',   emoji: '♻️', name: 'Eco Warrior',   desc: 'Redeem your first reward',           unlocked: false },
+    ];
+    document.getElementById('achievements-grid').innerHTML = `
+        <div class="achievements-grid-inner">
+            ${defs.map(a => `
+                <div class="achievement-badge ${a.unlocked ? 'unlocked' : 'locked'}">
+                    <div class="achievement-emoji">${a.emoji}</div>
+                    <div class="achievement-name">${a.name}</div>
+                    <div class="achievement-desc">${a.desc}</div>
+                </div>`).join('')}
+        </div>`;
+}
+
+
+/* ============================================================================
+   RECYCLING CENTERS PAGE
+   ============================================================================ */
+let _recycleMap = null;
+
+const RECYCLE_CENTERS = [
+    { id:1, name:'Lusaka Central Recycling Depot', address:'Cairo Rd, CBD',        lat:-15.4180, lng:28.2860, types:['Paper','Plastic','Metal','Glass'], open:'Mon–Fri 08:00–17:00' },
+    { id:2, name:'Kabulonga Recycling Point',      address:'Kabulonga Rd',          lat:-15.3820, lng:28.3080, types:['Plastic','Glass'],                  open:'Mon–Sat 08:00–16:00' },
+    { id:3, name:'Matero Drop-off Center',         address:'Matero Main Rd',        lat:-15.4080, lng:28.2650, types:['General','Organic'],                open:'Mon–Fri 07:00–15:00' },
+    { id:4, name:'Chelston Eco Station',           address:'Great East Rd',         lat:-15.3650, lng:28.3480, types:['Paper','Plastic','E-waste'],         open:'Tue–Sat 09:00–17:00' },
+    { id:5, name:'Northmead Collection Hub',       address:'Northmead Ave',         lat:-15.3960, lng:28.3180, types:['Metal','Glass','Plastic'],           open:'Mon–Fri 08:00–18:00' },
+];
+
+function loadRecyclingCentersPage() {
+    if (!_recycleMap) {
+        _recycleMap = L.map('recycle-map').setView([-15.4167, 28.2833], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap', maxZoom:19 }).addTo(_recycleMap);
+        RECYCLE_CENTERS.forEach(c => {
+            const icon = L.divIcon({ className:'', html:'<div style="font-size:1.4rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))">♻️</div>', iconSize:[28,28], iconAnchor:[14,14] });
+            L.marker([c.lat, c.lng], { icon }).addTo(_recycleMap)
+                .bindPopup(`<strong>${c.name}</strong><br><small>${c.address}</small><br><small>${c.types.join(', ')}</small>`);
+        });
+    } else {
+        setTimeout(() => _recycleMap.invalidateSize(), 300);
+    }
+
+    // List
+    const listEl = document.getElementById('recycle-list');
+    listEl.innerHTML = RECYCLE_CENTERS.map(c => `
+        <div class="bin-list-item" onclick="_recycleMap.flyTo([${c.lat},${c.lng}],15)" style="cursor:pointer">
+            <div class="bin-list-icon">♻️</div>
+            <div class="bin-list-body">
+                <div class="bin-list-label">${escHtml(c.name)}</div>
+                <div class="bin-list-addr">${escHtml(c.address)}</div>
+                <div class="bin-list-addr" style="color:var(--accent-primary)">${c.types.join(' · ')}</div>
+            </div>
+            <div style="font-size:0.7rem;color:var(--text-muted);text-align:right;flex-shrink:0">${c.open}</div>
+        </div>`).join('');
+
+    document.getElementById('recycle-locate-btn').onclick = () => {
+        navigator.geolocation?.getCurrentPosition(pos => {
+            _recycleMap.setView([pos.coords.latitude, pos.coords.longitude], 14);
+        });
+    };
+}
+
+
+/* ============================================================================
+   PAYMENT HISTORY PAGE
+   ============================================================================ */
+function loadPaymentHistoryPage() {
+    const plan = localStorage.getItem('sw_plan') || 'Basic';
+    document.getElementById('plan-name').textContent = plan + ' Plan';
+    document.getElementById('plan-meta').textContent = plan === 'Basic'
+        ? 'Free forever · Active'
+        : `ZMW ${plan === 'Standard' ? 50 : 150}/month · Active`;
+
+    const demoPayments = plan === 'Basic' ? [] : [
+        { icon:'💎', title:`${plan} Plan — Monthly`, meta:'Auto-renewed', date:'18 May 2026', amount:`ZMW ${plan === 'Standard' ? 50 : 150}`, type:'debit',  status:'paid' },
+        { icon:'💎', title:`${plan} Plan — Monthly`, meta:'Auto-renewed', date:'18 Apr 2026', amount:`ZMW ${plan === 'Standard' ? 50 : 150}`, type:'debit',  status:'paid' },
+        { icon:'⭐', title:'Upgrade: Basic → ' + plan, meta:'Plan changed',  date:'18 Mar 2026', amount:`ZMW ${plan === 'Standard' ? 50 : 150}`, type:'debit',  status:'paid' },
+    ];
+
+    const el = document.getElementById('payment-history-list');
+    if (!demoPayments.length) {
+        el.innerHTML = '<div class="payment-empty">No transactions yet. Upgrade your plan to see payment history here.</div>';
+    } else {
+        el.innerHTML = demoPayments.map(p => `
+            <div class="payment-row">
+                <div class="payment-row-icon">${p.icon}</div>
+                <div class="payment-row-body">
+                    <div class="payment-row-title">${escHtml(p.title)}</div>
+                    <div class="payment-row-meta">${escHtml(p.meta)} · ${escHtml(p.date)}</div>
+                </div>
+                <div class="payment-row-amount ${p.type}">${p.amount}</div>
+                <span class="payment-row-status ${p.status}">${p.status}</span>
+            </div>`).join('');
+    }
+}
+
+
+/* ============================================================================
+   SUPPORT PAGE
+   ============================================================================ */
+const CHAT_RESPONSES = {
+    'report': 'To report waste, click <strong>Report Waste</strong> in the sidebar or press the green button at the top right. Choose a category, add a location, and submit. You earn 10 green points for each verified report!',
+    'collection': 'Your next collection depends on your zone. Go to <strong>Schedule Pickup</strong> in the sidebar to see upcoming collection days on the calendar.',
+    'points': 'You earn <strong>10 green points</strong> per verified waste report. Redeem them in <strong>Recycling Rewards</strong> for bus passes, eco bags, recycling bins, and more.',
+    'subscription': 'To upgrade your plan, go to <strong>Settings → Subscription</strong>. We offer Standard (ZMW 50/mo) and Premium (ZMW 150/mo) plans. You can pay via <strong>Airtel Money</strong> or <strong>Zanaco Bank</strong>.',
+    'truck': 'Open <strong>Realtime Tracking</strong> in the Collection section to see live truck positions and estimated arrival times — auto-updated every 10 seconds.',
+    'default': 'Thanks for your message! Our support team typically responds within 2 hours during business hours (Mon–Fri 08:00–17:00). Is there anything else I can help with?',
+};
+
+const DEMO_TICKETS = [
+    { id:'TKT-001', subject:'Collection truck missed my street', category:'collection', status:'resolved', date:'10 May 2026' },
+    { id:'TKT-002', subject:'App not loading on mobile data',    category:'app',        status:'open',     date:'15 May 2026' },
+];
+
+function initSupportPage() {
+    renderTicketsList();
+    // Suggestion chips
+    document.querySelectorAll('.chat-suggest-btn').forEach(btn => {
+        btn.addEventListener('click', () => sendChatMessage(btn.dataset.msg));
+    });
+}
+
+function sendChatMessage(text) {
+    if (!text.trim()) return;
+    const msgs = document.getElementById('chat-messages');
+    const initials = (dashData?.user?.first_name?.[0] || 'U') + (dashData?.user?.last_name?.[0] || '');
+
+    msgs.innerHTML += `
+        <div class="chat-msg user">
+            <div class="chat-avatar user-avatar-chat">${initials}</div>
+            <div class="chat-bubble">${escHtml(text)}</div>
+        </div>`;
+
+    // Typing indicator
+    const typingId = 'typing-' + Date.now();
+    msgs.innerHTML += `<div class="chat-msg bot" id="${typingId}"><div class="chat-avatar bot-avatar">🤖</div><div class="chat-bubble chat-typing">Typing…</div></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+
+    // Auto-response
+    setTimeout(() => {
+        const lower = text.toLowerCase();
+        let response = CHAT_RESPONSES.default;
+        if (lower.includes('report') || lower.includes('waste')) response = CHAT_RESPONSES.report;
+        else if (lower.includes('collection') || lower.includes('pickup') || lower.includes('truck') || lower.includes('schedule')) response = CHAT_RESPONSES.collection;
+        else if (lower.includes('point') || lower.includes('reward') || lower.includes('green')) response = CHAT_RESPONSES.points;
+        else if (lower.includes('subscription') || lower.includes('plan') || lower.includes('airtel') || lower.includes('pay')) response = CHAT_RESPONSES.subscription;
+        else if (lower.includes('track') || lower.includes('driver') || lower.includes('location')) response = CHAT_RESPONSES.truck;
+
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.querySelector('.chat-bubble').innerHTML = response;
+        msgs.scrollTop = msgs.scrollHeight;
+    }, 1100);
+
+    document.getElementById('chat-input').value = '';
+}
+
+document.getElementById('chat-send-btn').addEventListener('click', () => {
+    sendChatMessage(document.getElementById('chat-input').value);
+});
+document.getElementById('chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChatMessage(e.target.value);
+});
+
+function renderTicketsList() {
+    const el = document.getElementById('tickets-list');
+    const stored = JSON.parse(localStorage.getItem('sw_tickets') || '[]');
+    const all = [...DEMO_TICKETS, ...stored];
+    if (!all.length) {
+        el.innerHTML = '<div class="empty-state"><i class="lucide-ticket"></i><p>No tickets yet. Click "New ticket" to get help.</p></div>';
+        lucide.createIcons(); return;
+    }
+    el.innerHTML = all.map(t => `
+        <div class="ticket-item">
+            <div class="ticket-status-dot ${t.status}"></div>
+            <div class="ticket-body">
+                <div class="ticket-subject">${escHtml(t.subject)}</div>
+                <div class="ticket-meta">${escHtml(t.id)} · ${escHtml(t.category)} · ${escHtml(t.date)}</div>
+            </div>
+            <span class="ticket-badge ${t.status}">${t.status}</span>
+        </div>`).join('');
+    lucide.createIcons();
+}
+
+// Ticket modal
+document.getElementById('create-ticket-btn').addEventListener('click', () => openModal('ticket-modal'));
+document.getElementById('close-ticket-modal').addEventListener('click', () => closeModal('ticket-modal'));
+document.getElementById('cancel-ticket-modal').addEventListener('click', () => closeModal('ticket-modal'));
+document.getElementById('submit-ticket-btn').addEventListener('click', () => {
+    const subject  = document.getElementById('ticket-subject').value.trim();
+    const category = document.getElementById('ticket-category').value;
+    if (!subject || !category) { showToast('Fill in all ticket fields.', 'error'); return; }
+    const stored = JSON.parse(localStorage.getItem('sw_tickets') || '[]');
+    stored.push({ id:`TKT-${String(stored.length + DEMO_TICKETS.length + 1).padStart(3,'0')}`, subject, category, status:'open', date: new Date().toLocaleDateString('en-ZM') });
+    localStorage.setItem('sw_tickets', JSON.stringify(stored));
+    closeModal('ticket-modal');
+    renderTicketsList();
+    showToast('Ticket submitted! We\'ll respond within 2 business hours.', 'success');
+});
+
+// Support report issue
+document.getElementById('submit-support-issue').addEventListener('click', () => {
+    const cat  = document.getElementById('support-issue-category').value;
+    const subj = document.getElementById('support-issue-subject').value.trim();
+    const desc = document.getElementById('support-issue-description').value.trim();
+    if (!cat || !subj || !desc) { showToast('Please fill in all fields.', 'error'); return; }
+    showToast('Issue reported! Our team will review it shortly.', 'success');
+    document.getElementById('support-issue-subject').value = '';
+    document.getElementById('support-issue-description').value = '';
+});
+
+function openModal(id)  { const m = document.getElementById(id); m.classList.add('open'); m.removeAttribute('aria-hidden'); }
+function closeModal(id) { const m = document.getElementById(id); m.classList.remove('open'); m.setAttribute('aria-hidden','true'); }
+
+
+/* ============================================================================
+   SETTINGS PAGE
+   ============================================================================ */
+function initSettingsPage() {
+    // Profile — populate fields from dashData
+    if (dashData?.user) {
+        const u = dashData.user;
+        document.getElementById('profile-first-name').value = u.first_name || '';
+        document.getElementById('profile-last-name').value  = u.last_name  || '';
+        document.getElementById('profile-email').value      = u.email      || '';
+        document.getElementById('profile-phone').value      = u.phone      || '';
+        document.getElementById('profile-address').value    = u.address    || '';
+        document.getElementById('profile-avatar-lg').textContent   = (u.first_name?.[0] || '?') + (u.last_name?.[0] || '');
+        document.getElementById('profile-display-name').textContent = `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'Unknown';
+        document.getElementById('profile-display-email').textContent = u.email || '';
+        const sel = document.getElementById('profile-compound');
+        if (u.compound) sel.value = u.compound;
+    }
+
+    // Theme options
+    document.querySelectorAll('.theme-opt').forEach(btn => {
+        btn.addEventListener('click', () => applyTheme(btn.dataset.themeOpt));
+    });
+    // Mark current theme
+    document.querySelectorAll('.theme-opt').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.themeOpt === _currentThemePref);
+    });
+
+    // Font size options
+    document.querySelectorAll('.font-sz-opt').forEach(btn => {
+        btn.addEventListener('click', () => applyFontSize(parseInt(btn.dataset.fontSize, 10)));
+    });
+
+    // High contrast toggle
+    const hcEl = document.getElementById('pref-high-contrast');
+    hcEl.checked = localStorage.getItem('sw_high_contrast') === 'true';
+    hcEl.addEventListener('change', () => {
+        const on = hcEl.checked;
+        document.documentElement.setAttribute('data-high-contrast', String(on));
+        localStorage.setItem('sw_high_contrast', String(on));
+    });
+
+    // Reduce motion toggle
+    const rmEl = document.getElementById('pref-reduce-motion');
+    rmEl.checked = localStorage.getItem('sw_reduce_motion') === 'true';
+    rmEl.addEventListener('change', () => {
+        const on = rmEl.checked;
+        document.documentElement.setAttribute('data-reduce-motion', String(on));
+        localStorage.setItem('sw_reduce_motion', String(on));
+    });
+
+    // Password toggles
+    document.querySelectorAll('.pwd-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.dataset.target);
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        });
+    });
+
+    // Password strength meter
+    document.getElementById('sec-new-pwd').addEventListener('input', updatePasswordStrength);
+
+    // Plan upgrade buttons
+    document.querySelectorAll('.plan-upgrade-btn').forEach(btn => {
+        btn.addEventListener('click', () => openPaymentModal(btn.dataset.plan, btn.dataset.price));
+    });
+}
+
+// Save profile
+document.getElementById('save-profile-btn').addEventListener('click', async () => {
+    const btn    = document.getElementById('save-profile-btn');
+    const status = document.getElementById('profile-save-status');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    // Demo save — real impl would call apiUpdateProfile(...)
+    await new Promise(r => setTimeout(r, 800));
+    status.textContent = '✓ Saved successfully';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="lucide-save"></i> Save changes';
+    lucide.createIcons();
+    setTimeout(() => { status.textContent = ''; }, 3000);
+    showToast('Profile updated.', 'success');
+});
+
+// Save password
+document.getElementById('save-password-btn').addEventListener('click', async () => {
+    const cur  = document.getElementById('sec-current-pwd').value;
+    const nw   = document.getElementById('sec-new-pwd').value;
+    const conf = document.getElementById('sec-confirm-pwd').value;
+    if (!cur || !nw || !conf)  { showToast('Fill in all password fields.', 'error'); return; }
+    if (nw !== conf)           { showToast('New passwords do not match.', 'error'); return; }
+    if (nw.length < 8)         { showToast('Password must be at least 8 characters.', 'error'); return; }
+    const btn = document.getElementById('save-password-btn');
+    btn.disabled = true; btn.textContent = 'Updating…';
+    await new Promise(r => setTimeout(r, 800));
+    btn.disabled = false; btn.innerHTML = '<i class="lucide-lock"></i> Update password';
+    lucide.createIcons();
+    ['sec-current-pwd','sec-new-pwd','sec-confirm-pwd'].forEach(id => document.getElementById(id).value = '');
+    showToast('Password updated successfully.', 'success');
+});
+
+// Delete account button (just a confirmation demo)
+document.getElementById('delete-account-btn').addEventListener('click', () => {
+    if (confirm('Are you absolutely sure? This will permanently delete your account and all data. This cannot be undone.')) {
+        showToast('Account deletion request submitted. You\'ll receive a confirmation email.', 'success');
+    }
+});
+
+function updatePasswordStrength() {
+    const pwd  = document.getElementById('sec-new-pwd').value;
+    const fill = document.getElementById('pwd-strength-fill');
+    const label = document.getElementById('pwd-strength-label');
+    let strength = 0;
+    if (pwd.length >= 8)  strength++;
+    if (/[A-Z]/.test(pwd))   strength++;
+    if (/[0-9]/.test(pwd))   strength++;
+    if (/[^A-Za-z0-9]/.test(pwd)) strength++;
+    const levels = [
+        { w:'20%',  bg:'#ef4444', text:'Weak' },
+        { w:'40%',  bg:'#f59e0b', text:'Fair' },
+        { w:'70%',  bg:'#3b82f6', text:'Good' },
+        { w:'100%', bg:'#10b981', text:'Strong' },
+    ];
+    const lv = levels[Math.max(0, strength - 1)] || levels[0];
+    fill.style.width = pwd.length ? lv.w : '0';
+    fill.style.background = lv.bg;
+    label.textContent = pwd.length ? lv.text : '';
+    label.style.color = lv.bg;
+}
+
+
+/* ============================================================================
+   PAYMENT MODAL
+   ============================================================================ */
+let _payPlan = 'Standard', _payPrice = 50;
+
+function openPaymentModal(plan, price) {
+    _payPlan  = plan;
+    _payPrice = parseInt(price, 10);
+    document.getElementById('payment-plan-name').textContent = plan;
+    document.getElementById('payment-amount').textContent    = `ZMW ${price}`;
+    const email = dashData?.user?.email || 'your-email@example.com';
+    document.getElementById('zanaco-ref').textContent = email;
+    document.getElementById('pay-status-msg').style.display = 'none';
+    document.getElementById('airtel-phone').value = '';
+    document.getElementById('zanaco-confirm-ref').value = '';
+    // Reset to airtel tab
+    document.querySelectorAll('.pay-method-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-pay-method="airtel"]').classList.add('active');
+    document.querySelectorAll('.pay-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('pay-panel-airtel').classList.add('active');
+    document.getElementById('pay-btn-label').textContent = 'Pay now';
+    openModal('payment-modal');
+}
+
+document.getElementById('close-payment-modal').addEventListener('click', () => closeModal('payment-modal'));
+document.getElementById('cancel-payment-modal').addEventListener('click', () => closeModal('payment-modal'));
+
+document.querySelectorAll('.pay-method-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.pay-method-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.pay-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`pay-panel-${tab.dataset.payMethod}`).classList.add('active');
+    });
+});
+
+document.getElementById('submit-payment-btn').addEventListener('click', async () => {
+    const activeMethod = document.querySelector('.pay-method-tab.active')?.dataset.payMethod;
+    const statusEl = document.getElementById('pay-status-msg');
+    const btn = document.getElementById('submit-payment-btn');
+
+    if (activeMethod === 'airtel') {
+        const phone = document.getElementById('airtel-phone').value.trim();
+        if (!phone || phone.length < 9) { showToast('Enter a valid Airtel Money number.', 'error'); return; }
+    } else {
+        const ref = document.getElementById('zanaco-confirm-ref').value.trim();
+        if (!ref) { showToast('Enter the transfer reference you used.', 'error'); return; }
+    }
+
+    btn.disabled = true;
+    document.getElementById('pay-btn-label').textContent = 'Processing…';
+    await new Promise(r => setTimeout(r, 1800));
+
+    statusEl.className = 'pay-status-msg success';
+    statusEl.innerHTML = activeMethod === 'airtel'
+        ? '✅ USSD prompt sent to your phone. Check *115# to approve the ZMW ' + _payPrice + ' payment.'
+        : '✅ Transfer confirmed! Your account will be upgraded within 1 business day.';
+    statusEl.style.display = 'block';
+    btn.disabled = false;
+    document.getElementById('pay-btn-label').textContent = 'Done';
+
+    // Persist plan choice (demo)
+    localStorage.setItem('sw_plan', _payPlan);
+    showToast(`🎉 Welcome to SmartWaste ${_payPlan}!`, 'success');
+    setTimeout(() => {
+        closeModal('payment-modal');
+        loadPaymentHistoryPage();
+    }, 2500);
+});
