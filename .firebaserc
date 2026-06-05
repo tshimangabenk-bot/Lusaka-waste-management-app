@@ -1,5 +1,17 @@
 {
   "projects": {
-    "default": "smart-waste-management-s-6225c"
+    "default": "lusaka-waste-management"
+  },
+  "targets": {
+    "lusaka-waste-management": {
+      "hosting": {
+        "user": [
+          "lusaka-waste-management"
+        ],
+        "admin": [
+          "lusaka-waste-management-admin"
+        ]
+      }
+    }
   }
 }

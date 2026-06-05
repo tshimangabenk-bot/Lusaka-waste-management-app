@@ -1,0 +1,106 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                    MYSQL NOT RUNNING - QUICK FIX                          ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+🔴 PROBLEM
+═════════════════════════════════════════════════════════════════════════════
+
+  FIX_ADMIN_LOGIN.bat failed because MySQL is not running
+
+
+🟢 SOLUTION - 4 STEPS
+═════════════════════════════════════════════════════════════════════════════
+
+  STEP 1: Open XAMPP Control Panel
+  ─────────────────────────────────
+  Location: C:\xampp\xampp-control.exe
+  
+  OR: Double-click XAMPP icon on your desktop
+
+
+  STEP 2: Start MySQL Service
+  ───────────────────────────
+  In XAMPP Control Panel:
+  
+  Find: MySQL    [Start] [Stop]
+  
+  Click: "Start" button
+  
+  Wait: Until you see green checkmark ✓
+  
+  (Should show something like: MySQL  [Start] [Stop] ✓)
+
+
+  STEP 3: Verify MySQL is Running
+  ────────────────────────────────
+  Open browser: http://localhost/phpmyadmin
+  
+  If phpMyAdmin loads = MySQL is running ✓
+
+
+  STEP 4: Run Database Setup
+  ──────────────────────────
+  Navigate to: C:\xampp\htdocs\Lusaka-waste-management-app-mariadb\
+               Lusaka-waste-management-app-mariadb\
+  
+  Double-click: SETUP_DATABASE.bat
+  
+  Wait for: ✓ SUCCESS!
+
+
+✅ THEN LOGIN
+═════════════════════════════════════════════════════════════════════════════
+
+  1. Open browser: http://localhost:8001/index.html
+  
+  2. Login:
+     Email:    admin@lcc.zm
+     Password: admin123
+  
+  3. Click "Login"
+  
+  4. You're in! 🎉
+
+
+🆘 TROUBLESHOOTING
+═════════════════════════════════════════════════════════════════════════════
+
+  ❌ "Start" button greyed out?
+     → MySQL might already be running
+     → Check if "Stop" button is available
+     → If yes, MySQL is on ✓
+  
+  ❌ MySQL won't start?
+     → Close XAMPP Control Panel
+     → Right-click it → "Run as Administrator"
+     → Try again
+  
+  ❌ "Port 3306 already in use"?
+     → Open Command Prompt:
+        taskkill /F /IM mysqld.exe
+     → Then try starting MySQL again
+  
+  ❌ Still can't connect?
+     → Check if MySQL is actually running:
+        tasklist | findstr mysql
+     → Should show "mysqld.exe" in list
+
+
+📁 FILES FOR YOU
+═════════════════════════════════════════════════════════════════════════════
+
+  SETUP_DATABASE.bat              ← Automatic setup (use this!)
+  MYSQL_STARTUP_GUIDE.md          ← Detailed guide
+  ADMIN_LOGIN_HELP.md             ← More help
+  FIX_ADMIN_LOGIN.bat             ← Original fix script
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+               START XAMPP → CLICK "Start" NEXT TO MYSQL
+                   → RUN SETUP_DATABASE.BAT
+
+═════════════════════════════════════════════════════════════════════════════

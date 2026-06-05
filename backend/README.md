@@ -1,21 +1,28 @@
 # Smart Waste Management System — Lusaka
-# Backend (Flask + PostGIS)
+# Backend (Flask + MariaDB via XAMPP)
 
 ## Quick Start
 
 ### 1. Prerequisites
 - Python 3.10+
-- PostgreSQL 14+ with PostGIS extension
+- XAMPP (Apache + MariaDB running)
 - (Optional) MQTT broker (Mosquitto) for IoT sensors
 
 ### 2. Database Setup
 
-```bash
-# Create the database
-psql -U postgres -c "CREATE DATABASE smart_waste_lusaka;"
+1. Start XAMPP and make sure **MySQL (MariaDB)** is running.
+2. Open **phpMyAdmin** at `http://localhost/phpmyadmin`.
+3. Click **New** → enter database name `smart_waste_lusaka`, collation `utf8mb4_unicode_ci` → **Create**.
+4. Select the `smart_waste_lusaka` database → **Import** → choose `DB.sql` → **Go**.
 
-# Enable PostGIS and load the schema
-psql -U postgres -d smart_waste_lusaka -f ../DB.sql
+Or via the command line (adjust path to match your XAMPP install):
+
+```bash
+# Windows (XAMPP default)
+"C:\xampp\mysql\bin\mysql.exe" -u root smart_waste_lusaka < DB.sql
+
+# macOS/Linux (XAMPP default)
+/opt/lampp/bin/mysql -u root smart_waste_lusaka < DB.sql
 ```
 
 ### 3. Install Dependencies
@@ -40,14 +47,14 @@ pip install -r requirements.txt
 # Copy the example env file
 cp .env.example .env
 
-# Edit .env with your real database credentials and secrets
+# Edit .env — by default it points to XAMPP root with no password.
+# If you set a MariaDB password in XAMPP, update DATABASE_URL:
+#   DATABASE_URL=mysql+pymysql://root:YOUR_PASSWORD@localhost:3306/smart_waste_lusaka
 ```
 
-### 5. Run Migrations (first time)
+### 5. Run Migrations (first time only — skip if you imported DB.sql)
 
 ```bash
-flask db init
-flask db migrate -m "initial"
 flask db upgrade
 ```
 
@@ -104,9 +111,10 @@ backend/
 ├── config.py               # Environment-based configuration
 ├── requirements.txt        # Python dependencies
 ├── .env.example            # Environment variable template
+├── DB.sql                  # MariaDB schema (import via phpMyAdmin or CLI)
 └── app/
     ├── __init__.py         # Application factory
-    ├── models.py           # SQLAlchemy / GeoAlchemy2 ORM models
+    ├── models.py           # SQLAlchemy ORM models
     ├── schemas.py          # Marshmallow serialization schemas
     ├── mqtt_listener.py    # MQTT subscriber for IoT sensors
     └── api/

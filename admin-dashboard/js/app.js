@@ -138,7 +138,7 @@ async function registerFcmToken() {
 
         let swReg;
         if ('serviceWorker' in navigator) {
-            swReg = await navigator.serviceWorker.register('/admin-dashboard/firebase-messaging-sw.js');
+            swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
         }
 
         const messaging = firebase.messaging();

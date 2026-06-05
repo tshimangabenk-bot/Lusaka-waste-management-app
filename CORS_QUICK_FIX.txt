@@ -1,0 +1,124 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║              CORS ERROR - BACKEND NOT RESPONDING                          ║
+║                                                                            ║
+║        "Failed to fetch... net::ERR_FAILED"                               ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+🔴 PROBLEM
+═════════════════════════════════════════════════════════════════════════════
+
+  When trying to login:
+  • "Failed to fetch"
+  • CORS error
+  • net::ERR_FAILED
+
+  This means: Backend (Port 5000) is NOT responding
+
+
+🟢 QUICK FIX (5 Steps)
+═════════════════════════════════════════════════════════════════════════════
+
+  STEP 1: Check Backend Status
+  ────────────────────────────
+  Option A: Double-click CHECK_BACKEND.bat
+  Option B: Open http://localhost:5000 in browser
+
+
+  STEP 2: If Backend Not Responding
+  ──────────────────────────────────
+  Open Command Prompt and run:
+  
+  cd C:\xampp\htdocs\Lusaka-waste-management-app-mariadb\
+     Lusaka-waste-management-app-mariadb\backend
+  
+  C:\xampp\htdocs\Lusaka-waste-management-app-mariadb\
+  venv\Scripts\python.exe run.py
+  
+  Wait for: "Running on http://127.0.0.1:5000"
+  Keep window open
+
+
+  STEP 3: Verify Backend is Running
+  ──────────────────────────────────
+  Open browser: http://localhost:5000
+  
+  Should see:
+  {"status": "ok", "service": "Smart Waste Management API — Lusaka"}
+
+
+  STEP 4: Clear Browser Cache
+  ───────────────────────────
+  Press: Ctrl+Shift+Delete
+  
+  Select: "All time"
+  Check: All options
+  Click: "Clear data"
+  
+  Close and reopen browser
+
+
+  STEP 5: Try Login Again
+  ──────────────────────
+  Open: http://localhost:8001/index.html
+  Email: admin@lcc.zm
+  Password: admin123
+  Click: Login
+  
+  Should work! ✅
+
+
+🔍 VERIFY BACKEND IS RUNNING
+═════════════════════════════════════════════════════════════════════════════
+
+  Test 1: Browser
+  ├─ Open: http://localhost:5000
+  └─ Should show JSON response (not blank)
+
+  Test 2: Check Backend Window
+  ├─ Should see Flask window (maybe minimized)
+  └─ Should show "Running on http://127.0.0.1:5000"
+
+  Test 3: Check Port
+  ├─ Command: netstat -ano | findstr :5000
+  └─ Should show something listening on port 5000
+
+
+🆘 TROUBLESHOOTING
+═════════════════════════════════════════════════════════════════════════════
+
+  ❌ Backend window not found / closed?
+     → Restart it with command above (Step 2)
+  
+  ❌ Backend won't start - shows errors?
+     → Check database is running
+     → Check MySQL is on
+     → See CORS_ERROR_FIX.md for detailed errors
+  
+  ❌ Port 5000 already in use?
+     → Command: taskkill /F /IM python.exe
+     → Then start backend again
+  
+  ❌ CORS still blocked after these steps?
+     → Try different browser (Chrome vs Firefox)
+     → Completely restart computer
+     → See CORS_ERROR_FIX.md for advanced fixes
+
+
+📁 FILES FOR YOU
+═════════════════════════════════════════════════════════════════════════════
+
+  CHECK_BACKEND.bat               ← Use this to check backend status
+  CORS_ERROR_FIX.md               ← Detailed troubleshooting guide
+  Backend terminal window         ← Keep open while using system
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+        1. VERIFY BACKEND IS RUNNING
+        2. CLEAR BROWSER CACHE (Ctrl+Shift+Delete)
+        3. TRY LOGIN AGAIN
+
+═════════════════════════════════════════════════════════════════════════════

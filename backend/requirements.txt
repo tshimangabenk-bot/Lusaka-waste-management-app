@@ -9,8 +9,12 @@ flask-marshmallow==1.2.1
 marshmallow==3.26.1
 marshmallow-sqlalchemy==1.1.0
 
-# Database (SQLite for dev — no extra driver needed)
+# Database
 SQLAlchemy==2.0.36
+
+# MariaDB / MySQL driver (used by XAMPP)
+PyMySQL==1.1.1
+cryptography==42.0.8   # required by PyMySQL for caching_sha2_password auth
 
 # Utilities
 python-dotenv==1.0.1

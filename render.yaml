@@ -12,16 +12,8 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: FIREBASE_STORAGE_BUCKET
-        value: smart-waste-management-s-6225c.firebasestorage.app
+        value: lusaka-waste-management.firebasestorage.app
       - key: DATABASE_URL
-        fromDatabase:
-          name: smart-waste-db
-          property: connectionString
+        sync: false
       - key: FIREBASE_CREDENTIALS_JSON
         sync: false
-
-databases:
-  - name: smart-waste-db
-    databaseName: smart_waste
-    user: smart_waste_user
-    plan: free

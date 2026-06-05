@@ -1,24 +1,22 @@
 {
-  "hosting": {
-    "public": "user-dashboard",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "/api/**",
-        "destination": "/api/**"
-      }
-    ]
-  },
-  "emulators": {
-    "dataconnect": {
-      "dataDir": "dataconnect/.dataconnect/pgliteData"
+  "hosting": [
+    {
+      "target": "user",
+      "public": "user-dashboard",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    {
+      "target": "admin",
+      "public": "admin-dashboard",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
     }
-  },
-  "dataconnect": {
-    "source": "dataconnect"
-  }
+  ]
 }
