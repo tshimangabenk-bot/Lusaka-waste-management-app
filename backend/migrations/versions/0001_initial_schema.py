@@ -105,7 +105,7 @@ def upgrade():
     )
     op.create_table('reports',
         sa.Column('id', sa.String(length=36), nullable=False),
-        sa.Column('reporter_id', sa.String(length=36), nullable=False),
+        sa.Column('reporter_id', sa.String(length=36), nullable=True),
         sa.Column('category', sa.String(length=30), nullable=False),
         sa.Column('description', sa.Text(), nullable=False),
         sa.Column('latitude', sa.Float(), nullable=True),

@@ -520,6 +520,78 @@ img { max-width: 100%; display: block; }
     font-family: var(--font-mono);
 }
 
+.live-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    font-size: 0.76rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4);
+}
+
+.live-status-chip.online {
+    color: var(--success);
+    border-color: rgba(16, 185, 129, 0.35);
+    background: var(--success-soft);
+}
+
+.live-status-chip.online .live-dot {
+    background: var(--success);
+    animation: livePulse 1.8s infinite;
+}
+
+.live-status-chip.warning {
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.35);
+    background: var(--warning-soft);
+}
+
+.live-status-chip.warning .live-dot { background: var(--warning); }
+.live-status-chip.offline {
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.35);
+    background: var(--danger-soft);
+}
+
+.live-status-chip.offline .live-dot { background: var(--danger); }
+.live-status-chip.checking .live-dot { animation: livePulse 1.1s infinite; }
+
+.sync-status-text {
+    min-width: 92px;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.header-btn.is-spinning [data-lucide] {
+    animation: spin 0.85s linear infinite;
+}
+
+@keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 currentColor; }
+    70%  { box-shadow: 0 0 0 8px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 
 /* ── Page Container ───────────────────────────────────────────────────────── */
 .page-container {
@@ -582,6 +654,16 @@ img { max-width: 100%; display: block; }
 
 .stat-card:hover::before {
     opacity: 1;
+}
+
+.stat-card.stat-pulse {
+    animation: statPulse 0.55s ease;
+}
+
+@keyframes statPulse {
+    0%   { box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+    45%  { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.13); }
+    100% { box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 .stat-card-header {
@@ -1268,6 +1350,8 @@ select.form-control {
         padding: 0 16px;
     }
     .header-search { display: none; }
+    .live-status-chip,
+    .sync-status-text { display: none; }
     .page-container { padding: 16px; }
     .form-row { grid-template-columns: 1fr; }
 }

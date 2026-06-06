@@ -9,6 +9,8 @@ let mapMarkers = [];
 let charts = {};
 let autoRefreshTimer = null;
 let searchTimeout = null;
+let lastSuccessfulSync = null;
+let backendStatusTimer = null;
 
 const PAGINATION = {
     bins:    { page: 1, perPage: 15 },
@@ -66,6 +68,116 @@ function fillBarHTML(pct) {
 
 function categoryLabel(cat) {
     return (cat || "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function getApiRoot() {
+    return (typeof API_BASE === "string" ? API_BASE : "").replace(/\/api\/?$/, "");
+}
+
+function createDynamicChrome() {
+    if (!$("#backendStatusChip")) {
+        const chip = document.createElement("div");
+        chip.id = "backendStatusChip";
+        chip.className = "live-status-chip checking";
+        chip.innerHTML = `<span class="live-dot"></span><span id="backendStatusText">Checking API</span>`;
+        $(".header-right")?.insertBefore(chip, $("#headerRefreshBtn"));
+    }
+
+    if (!$("#syncStatusText")) {
+        const sync = document.createElement("div");
+        sync.id = "syncStatusText";
+        sync.className = "sync-status-text";
+        sync.textContent = "Not synced yet";
+        $(".header-right")?.appendChild(sync);
+    }
+}
+
+function setRefreshBusy(isBusy) {
+    const btn = $("#headerRefreshBtn");
+    if (!btn) return;
+    btn.disabled = isBusy;
+    btn.classList.toggle("is-spinning", isBusy);
+}
+
+function markSynced() {
+    lastSuccessfulSync = new Date();
+    const text = $("#syncStatusText");
+    if (text) text.textContent = `Synced ${lastSuccessfulSync.toLocaleTimeString("en-ZM", { hour: "2-digit", minute: "2-digit" })}`;
+    const lastSync = $("#lastSyncTime");
+    if (lastSync) lastSync.textContent = lastSuccessfulSync.toLocaleTimeString("en-ZM", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+async function updateBackendStatus() {
+    const chip = $("#backendStatusChip");
+    const text = $("#backendStatusText");
+    if (!chip || !text) return;
+
+    chip.className = "live-status-chip checking";
+    text.textContent = "Checking API";
+
+    try {
+        const res = await fetch(`${getApiRoot()}/`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json().catch(() => ({}));
+        chip.className = `live-status-chip ${data.firebase ? "online" : "warning"}`;
+        text.textContent = data.firebase ? "API + Firebase live" : "API live";
+    } catch {
+        chip.className = "live-status-chip offline";
+        text.textContent = "API offline";
+    }
+}
+
+function animateValue(el, target, suffix = "") {
+    const start = Number(el.dataset.currentValue || 0);
+    const duration = 650;
+    const started = performance.now();
+    const formatter = new Intl.NumberFormat("en-ZM");
+
+    function tick(now) {
+        const pct = Math.min((now - started) / duration, 1);
+        const eased = 1 - Math.pow(1 - pct, 3);
+        const value = Math.round(start + (target - start) * eased);
+        el.textContent = `${formatter.format(value)}${suffix}`;
+        if (pct < 1) requestAnimationFrame(tick);
+        else el.dataset.currentValue = String(target);
+    }
+
+    requestAnimationFrame(tick);
+}
+
+function animateVisibleNumbers(scope = document) {
+    scope.querySelectorAll(".stat-card .value").forEach(el => {
+        const raw = el.textContent.replace(/,/g, "").trim();
+        const match = raw.match(/^(\d+)(%?)$/);
+        if (match) animateValue(el, Number(match[1]), match[2]);
+    });
+}
+
+function flashChangedCards(scope = document) {
+    scope.querySelectorAll(".stat-card").forEach(card => {
+        card.classList.remove("stat-pulse");
+        void card.offsetWidth;
+        card.classList.add("stat-pulse");
+    });
+}
+
+async function refreshCurrentPage(showMessage = true) {
+    setRefreshBusy(true);
+    try {
+        await refreshPageData(currentPage);
+        renderPage(currentPage);
+        updateNotifBadge();
+        refreshIcons();
+        markSynced();
+        animateVisibleNumbers();
+        flashChangedCards();
+        updateBackendStatus();
+        if (showMessage) showToast("Fresh data loaded");
+    } catch (err) {
+        showToast(err.message || "Refresh failed", "error");
+    } finally {
+        setRefreshBusy(false);
+    }
 }
 
 
@@ -254,6 +366,7 @@ function navigateTo(page) {
 
     renderPage(page);
     refreshIcons();
+    animateVisibleNumbers(pageEl || document);
 }
 
 $$(".nav-item").forEach(item => {
@@ -285,10 +398,18 @@ updateClock();
 
 
 // ── Refresh Button ────────────────────────────────────────────────────────────
-$("#headerRefreshBtn").addEventListener("click", () => {
-    renderPage(currentPage);
-    refreshIcons();
-    showToast("Data refreshed successfully");
+$("#headerRefreshBtn").addEventListener("click", () => refreshCurrentPage(true));
+
+document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        $("#globalSearch")?.focus();
+    }
+    if (e.key === "Escape") {
+        closeSearch();
+        $("#notifDropdown")?.classList.remove("open");
+        closeModal();
+    }
 });
 
 
@@ -692,6 +813,8 @@ function renderDashboard() {
 
     renderCollectionTrendsChart(7);
     renderFillDistributionChart();
+    animateVisibleNumbers($("#statsGrid"));
+    flashChangedCards($("#statsGrid"));
 
     const recentAlerts = ALERTS.filter(a => !a.resolved).slice(0, 6);
     $("#dashboardAlerts").innerHTML = recentAlerts.length === 0
@@ -1686,12 +1809,9 @@ function saveSettings() {
 function resetAutoRefresh() {
     if (autoRefreshTimer) clearInterval(autoRefreshTimer);
     const interval = parseInt($("#settingsRefreshInterval").value) || 30;
-    autoRefreshTimer = setInterval(() => {
+    autoRefreshTimer = setInterval(async () => {
         if (!getToken()) return;
-        renderPage(currentPage);
-        refreshIcons();
-        const lastSync = $("#lastSyncTime");
-        if (lastSync) lastSync.textContent = new Date().toLocaleTimeString("en-ZM", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        await refreshCurrentPage(false);
     }, interval * 1000);
 }
 
@@ -1700,16 +1820,21 @@ $("#saveSettingsBtn").addEventListener("click", saveSettings);
 
 // ── Initial Render ────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+    createDynamicChrome();
     checkAuth();
     renderSettings();
     resetAutoRefresh();
     refreshIcons();
+    updateBackendStatus();
+    backendStatusTimer = setInterval(updateBackendStatus, 45000);
 
     if (getToken()) {
         await loadAllData();
+        markSynced();
         registerFcmToken();
     }
 
     renderDashboard();
     updateNotifBadge();
+    animateVisibleNumbers();
 });

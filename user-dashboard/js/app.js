@@ -9,9 +9,146 @@ let currentPage   = 'overview';
 let binsMap       = null;
 let binsMapInited = false;
 let activeFilter  = 'all';
+let residentStatusTimer = null;
+let residentLastSync = null;
+
+function apiRoot() {
+    return (typeof API_BASE === 'string' ? API_BASE : '').replace(/\/api\/?$/, '');
+}
+
+function createResidentDynamicChrome() {
+    const headerRight = document.querySelector('.header-right');
+    if (!headerRight) return;
+
+    if (!document.getElementById('residentStatusChip')) {
+        const chip = document.createElement('div');
+        chip.id = 'residentStatusChip';
+        chip.className = 'live-status-chip checking';
+        chip.innerHTML = '<span class="live-dot"></span><span id="residentStatusText">Checking API</span>';
+        headerRight.prepend(chip);
+    }
+
+    if (!document.getElementById('residentRefreshBtn')) {
+        const btn = document.createElement('button');
+        btn.className = 'icon-btn';
+        btn.id = 'residentRefreshBtn';
+        btn.type = 'button';
+        btn.title = 'Refresh data';
+        btn.innerHTML = '<i class="lucide-refresh-cw"></i>';
+        headerRight.insertBefore(btn, document.getElementById('theme-toggle-btn'));
+        btn.addEventListener('click', () => refreshResidentPage(true));
+    }
+
+    if (!document.getElementById('residentSyncText')) {
+        const sync = document.createElement('div');
+        sync.id = 'residentSyncText';
+        sync.className = 'sync-status-text';
+        sync.textContent = 'Not synced yet';
+        headerRight.appendChild(sync);
+    }
+}
+
+function setResidentRefreshBusy(isBusy) {
+    const btn = document.getElementById('residentRefreshBtn');
+    if (!btn) return;
+    btn.disabled = isBusy;
+    btn.classList.toggle('is-spinning', isBusy);
+}
+
+function markResidentSynced() {
+    residentLastSync = new Date();
+    const sync = document.getElementById('residentSyncText');
+    if (sync) {
+        sync.textContent = `Synced ${residentLastSync.toLocaleTimeString('en-ZM', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+}
+
+async function updateResidentBackendStatus(forceDemo = false) {
+    const chip = document.getElementById('residentStatusChip');
+    const text = document.getElementById('residentStatusText');
+    if (!chip || !text) return;
+
+    if (forceDemo) {
+        chip.className = 'live-status-chip warning';
+        text.textContent = 'Demo mode';
+        return;
+    }
+
+    chip.className = 'live-status-chip checking';
+    text.textContent = 'Checking API';
+    try {
+        const res = await fetch(`${apiRoot()}/`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json().catch(() => ({}));
+        chip.className = `live-status-chip ${data.firebase ? 'online' : 'warning'}`;
+        text.textContent = data.firebase ? 'API + Firebase live' : 'API live';
+    } catch {
+        chip.className = 'live-status-chip offline';
+        text.textContent = 'API offline';
+    }
+}
+
+function animateNumber(el, target, suffix = '') {
+    const start = Number(el.dataset.currentValue || 0);
+    const duration = 650;
+    const started = performance.now();
+    const formatter = new Intl.NumberFormat('en-ZM');
+
+    function tick(now) {
+        const pct = Math.min((now - started) / duration, 1);
+        const eased = 1 - Math.pow(1 - pct, 3);
+        const value = Math.round(start + (target - start) * eased);
+        el.textContent = `${formatter.format(value)}${suffix}`;
+        if (pct < 1) requestAnimationFrame(tick);
+        else el.dataset.currentValue = String(target);
+    }
+
+    requestAnimationFrame(tick);
+}
+
+function animateResidentNumbers(scope = document) {
+    scope.querySelectorAll('.stat-value, #hero-points, #points-value').forEach(el => {
+        const raw = el.textContent.replace(/,/g, '').trim();
+        const match = raw.match(/^(\d+)(%?)$/);
+        if (match) animateNumber(el, Number(match[1]), match[2]);
+    });
+}
+
+function pulseResidentStats(scope = document) {
+    scope.querySelectorAll('.stat-card').forEach(card => {
+        card.classList.remove('stat-pulse');
+        void card.offsetWidth;
+        card.classList.add('stat-pulse');
+    });
+}
+
+async function refreshResidentPage(showMessage = true) {
+    setResidentRefreshBusy(true);
+    try {
+        if (currentPage === 'overview') await loadDashboard();
+        else if (currentPage === 'reports') await loadReports(activeFilter);
+        else if (currentPage === 'rewards') await loadRewards();
+        else if (currentPage === 'bins') await initBinsPage();
+        else if (currentPage === 'notifications') await loadNotifications();
+        else if (currentPage === 'schedule') await loadSchedulePage();
+        else if (currentPage === 'tracking') await loadTrackingPage();
+
+        markResidentSynced();
+        animateResidentNumbers();
+        pulseResidentStats();
+        updateResidentBackendStatus();
+        if (showMessage) showToast('Latest data loaded.', 'success');
+    } catch (err) {
+        showToast(err.message || 'Refresh failed.', 'error');
+    } finally {
+        setResidentRefreshBusy(false);
+        lucide.createIcons();
+    }
+}
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+    createResidentDynamicChrome();
     lucide.createIcons();
 
     setupNav();
@@ -19,6 +156,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSidebarToggle();
 
     await loadDashboard();
+    updateResidentBackendStatus();
+    residentStatusTimer = setInterval(updateResidentBackendStatus, 45000);
 });
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -103,12 +242,16 @@ async function loadDashboard() {
         dashData = await apiGetDashboard();
         renderSidebar();
         renderOverview();
+        markResidentSynced();
+        updateResidentBackendStatus();
         registerFcmToken();
     } catch {
         // Backend is offline — silently fall back to demo data
         dashData = getDemoData();
         renderSidebar();
         renderOverview();
+        markResidentSynced();
+        updateResidentBackendStatus(true);
         showDemoBanner();
     }
 }
@@ -236,6 +379,8 @@ function renderOverview() {
     document.getElementById('stat-pending').textContent  = rs.pending;
     document.getElementById('stat-resolved').textContent = rs.resolved;
     document.getElementById('stat-lifetime').textContent = r.lifetime_points.toLocaleString();
+    animateResidentNumbers(document.getElementById('page-overview'));
+    pulseResidentStats(document.getElementById('page-overview'));
 
     // Recent reports
     const rEl = document.getElementById('overview-reports');

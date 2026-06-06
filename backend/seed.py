@@ -3,6 +3,7 @@ Seed script — creates all tables and populates sample data for development.
 Run once:  python seed.py
 Re-run safely: skips if already seeded.
 """
+import os
 from datetime import datetime, timezone, timedelta, date
 from werkzeug.security import generate_password_hash
 from app import create_app, db
@@ -23,10 +24,11 @@ def seed():
             print("Database already fully seeded. Skipping.")
             return
 
-        print("Dropping existing tables and recreating…")
-        db.drop_all()
-        db.create_all()
-        print("Tables created.")
+        if os.getenv("SEED_RESET", "1") != "0":
+            print("Dropping existing tables and recreating…")
+            db.drop_all()
+            db.create_all()
+            print("Tables created.")
 
         # ── Zones ──────────────────────────────────────────────────────────
         zones_data = [

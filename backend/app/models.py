@@ -260,7 +260,7 @@ class Report(db.Model):
     __tablename__ = "reports"
 
     id              = db.Column(db.String(36), primary_key=True, default=gen_uuid)
-    reporter_id     = db.Column(db.String(36), db.ForeignKey("users.id", ondelete="SET NULL"), nullable=False)
+    reporter_id     = db.Column(db.String(36), db.ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     category        = db.Column(db.String(30), nullable=False)   # type of waste issue
     description     = db.Column(db.Text, nullable=False)
     latitude        = db.Column(db.Float)                         # GPS location of the reported issue
